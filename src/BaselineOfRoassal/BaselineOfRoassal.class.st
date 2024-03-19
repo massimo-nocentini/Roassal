@@ -207,5 +207,6 @@ BaselineOfRoassal >> testPackagesNames [
 	'Roassal-Inspector-Tests'
 	'Roassal-BaselineMap-Tests'
 	'Roassal-SVG-Tests'
+	'Roassal-Utils-Tests'
 	)
 ]
