@@ -171,20 +171,20 @@ BaselineOfRoassal >> geometry: spec [
 BaselineOfRoassal >> layouts: spec [
 	spec
 		baseline: 'RoassalLayouts'
-		with: [ spec repository: 'github://pharo-graphics/RoassalLayouts:v1.01/src' ]
+		with: [ spec repository: 'github://pharo-graphics/RoassalLayouts/src' ]
 ]
 
 { #category : 'dependencies' }
 BaselineOfRoassal >> numeric: spec [
 	spec baseline: 'NumericScales'with: [ 
-		spec repository: 'github://pharo-graphics/NumericScales:v1.03/src' ].
+		spec repository: 'github://pharo-graphics/NumericScales/src' ].
 ]
 
 { #category : 'dependencies' }
 BaselineOfRoassal >> rtree: spec [
 	spec
 		baseline: 'RTree'
-		with: [ spec repository: 'github://pharo-graphics/RTree:v1.01/src' ]
+		with: [ spec repository: 'github://pharo-graphics/RTree/src' ]
 ]
 
 { #category : 'dependencies' }
