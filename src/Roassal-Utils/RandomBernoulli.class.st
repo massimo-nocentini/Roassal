@@ -9,7 +9,7 @@ The Bernoulli distribution is a special case of the binomial distribution where 
 "
 Class {
 	#name : 'RandomBernoulli',
-	#superclass : 'Random',
+	#superclass : 'RSRandom',
 	#instVars : [
 		'p'
 	],
@@ -18,10 +18,21 @@ Class {
 	#tag : 'Random'
 }
 
+{ #category : 'sampling' }
+RandomBernoulli >> cdf: x [
+
+	^ x < 0.0
+		  ifTrue: [ 0.0 ]
+		  ifFalse: [
+			  x >= 1.0
+				  ifTrue: [ 1.0 ]
+				  ifFalse: [ 1.0 - p ] ]
+]
+
 { #category : 'accessing' }
 RandomBernoulli >> density: x [
 
-	^ p ** x * (1 - p ** (1 - x))
+	^ p ** x * (1.0 - p ** (1.0 - x))
 ]
 
 { #category : 'accessing' }
@@ -41,11 +52,11 @@ RandomBernoulli >> initialize [
 { #category : 'accessing' }
 RandomBernoulli >> next [
 
-	^ (super next < p) asInteger
+	^ (super next <= p) asInteger
 ]
 
 { #category : 'accessing' }
 RandomBernoulli >> p: aNumber [
 
-	p := aNumber
+	p := aNumber min: 0.0 max: 1.0
 ]
