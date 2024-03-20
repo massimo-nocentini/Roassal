@@ -1,3 +1,6 @@
+"
+I am an abstract class for random variables.
+"
 Class {
 	#name : 'RSRandom',
 	#superclass : 'Random',
@@ -13,7 +16,7 @@ RSRandom >> cdf: x [
 ]
 
 { #category : 'sampling' }
-RSRandom >> cdf: x ifSuccess: sBlock ifFailure: fBlock [
+RSRandom >> cdf: x ifLessThan: sBlock else: fBlock [
 
 	^ super next < (self cdf: x)
 		  ifTrue: [ sBlock cull: x ]

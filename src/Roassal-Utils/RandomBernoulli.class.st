@@ -46,7 +46,7 @@ RandomBernoulli >> initialize [
 
 	super initialize.
 
-	self p: 0.5
+	self p: 0.5 "a fair coin"
 ]
 
 { #category : 'accessing' }
