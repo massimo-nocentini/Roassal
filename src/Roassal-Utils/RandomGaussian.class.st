@@ -11,8 +11,9 @@ Class {
 		'sigma',
 		'magic'
 	],
-	#category : 'Roassal-Utils',
-	#package : 'Roassal-Utils'
+	#category : 'Roassal-Utils-Random',
+	#package : 'Roassal-Utils',
+	#tag : 'Random'
 }
 
 { #category : 'sampling' }

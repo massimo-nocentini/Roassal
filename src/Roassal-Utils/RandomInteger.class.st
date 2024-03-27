@@ -5,8 +5,9 @@ Class {
 		'atLeast',
 		'atMost'
 	],
-	#category : 'Roassal-Utils',
-	#package : 'Roassal-Utils'
+	#category : 'Roassal-Utils-Random',
+	#package : 'Roassal-Utils',
+	#tag : 'Random'
 }
 
 { #category : 'accessing' }
@@ -19,6 +20,12 @@ RandomInteger >> atLeast: anObject [
 RandomInteger >> atMost: anObject [
 
 	atMost := anObject
+]
+
+{ #category : 'sampling' }
+RandomInteger >> cdf: x [
+
+	self shouldNotImplement
 ]
 
 { #category : 'initialization' }
