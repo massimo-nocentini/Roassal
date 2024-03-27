@@ -439,6 +439,69 @@ RSLineBuilder >> fromShapes: someShapes [
 	fromShapes := someShapes asGroup
 ]
 
+{ #category : 'instance creation' }
+RSLineBuilder >> horizontalDeCasteljauSegmentedLine [
+	"instance creation"
+
+	^ self horizontalDovetailSegmentedLine: (RSSegmentedPolyline new
+			   lineBlock: [ :anArrayOfPoints |
+				   RSdeCasteljauLine new
+					   samplesChebyshev: anArrayOfPoints size;
+					   controlPoints: anArrayOfPoints;
+					   yourself ];
+			   junctionBlock: [ :aLine :each |
+				   aLine
+					   junction: each
+					   right: [ :c0Line :c1Line :c2Line | c1Line ] ];
+			   yourself)
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder >> horizontalDovetailSegmentedLine: aLine [
+	"instance creation"
+
+	^ self
+		  horizontalSegmentedLine: aLine
+		  controlPointsController: self dovetailControlPointsController
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder >> horizontalSegmentedBezierLine [
+	"instance creation"
+
+	^ (self horizontalLine: RSSegmentedBeziersPolyline new)
+		  controlPointsController: self dovetailControlPointsController;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder >> horizontalSegmentedLine: aLine [
+	"instance creation"
+
+	^ self
+		  horizontalSegmentedLine: aLine
+		  controlPointsController: RSHorizontalCPAPController new
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder >> horizontalSegmentedLine: aLine controlPointsController: cpapController [
+
+	| controller predicate |
+	controller := RSSegmentedCPAPController new
+		              controlPointsController: cpapController;
+		              yourself.
+
+	"Keep a reference to the original predicate."
+	predicate := controller linearizationPredicate.
+
+	controller linearizationPredicate: [ :from :to |
+		(predicate value: from value: to) or: [ (from y - to y) abs <= 10 ] ].
+
+	^ (self new: aLine)
+		  controlPointsController: controller;
+		  yourself
+]
+
 { #category : 'initialization' }
 RSLineBuilder >> initialize [
 	super initialize.
