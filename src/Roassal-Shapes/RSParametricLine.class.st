@@ -91,7 +91,7 @@ RSParametricLine >> designPoints [
 	^ points
 ]
 
-{ #category : 'accessing' }
+{ #category : 'initialization' }
 RSParametricLine >> initialize [
 	"initialization"
 

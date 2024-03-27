@@ -91,7 +91,7 @@ RSSegmentedCPAPController >> controlPointsFrom: from to: to [
 	self shouldNotImplement
 ]
 
-{ #category : 'hooks' }
+{ #category : 'initialization' }
 RSSegmentedCPAPController >> initialize [
 	"initialization"
 

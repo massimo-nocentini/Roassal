@@ -149,7 +149,7 @@ RSSegmentedBeziersPolyline >> cornerRadiusAmongPoint: aPoint andPoint: anotherPo
 		  self cornerRadii"
 ]
 
-{ #category : 'visiting' }
+{ #category : 'initialization' }
 RSSegmentedBeziersPolyline >> initialize [
 	"initialization"
 

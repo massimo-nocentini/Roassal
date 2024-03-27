@@ -201,7 +201,7 @@ RSdeCasteljauLine >> increment [
 		  yourself
 ]
 
-{ #category : 'adding' }
+{ #category : 'initialization' }
 RSdeCasteljauLine >> initialize [
 	"initialization"
 
