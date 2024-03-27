@@ -18,11 +18,9 @@ RandomBoxMullerBivariateGaussian >> cdf: x [
 { #category : 'accessing' }
 RandomBoxMullerBivariateGaussian >> next [
 
-	| u1 u2 z0 z1 z w |
-	u1 := super next.
-	u2 := super next.
-	z := (-2 * u1 ln) sqrt.
-	w := 2 * Float pi * u2.
+	| z0 z1 z w |
+	z := super next ln doubled negated sqrt.
+	w := Float twoPi * super next.
 	z0 := w cos * z.
 	z1 := w sin * z.
 	^ z0 @ z1

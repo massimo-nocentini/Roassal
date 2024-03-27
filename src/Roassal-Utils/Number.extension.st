@@ -7,7 +7,25 @@ Number >> bernstein: n choose: i [
 ]
 
 { #category : '*Roassal-Utils' }
+Number >> decrement [
+
+	^ self - 1
+]
+
+{ #category : '*Roassal-Utils' }
+Number >> doubled [
+
+	^ self * 2
+]
+
+{ #category : '*Roassal-Utils' }
 Number >> halved [
 
 	^ self / 2
+]
+
+{ #category : '*Roassal-Utils' }
+Number >> increment [
+
+	^ self + 1
 ]

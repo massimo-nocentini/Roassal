@@ -12,9 +12,9 @@ Class {
 { #category : 'sampling' }
 RandomExponential >> cdf: x [
 
-	^ x < 0
-		  ifTrue: [ Error signal: 'I accept non negative arguments only.' ]
-		  ifFalse: [ 1.0 - (x * lambda) negated exp ]
+	^ x < 0.0
+		  ifTrue: [ 0.0 ]
+		  ifFalse: [ (x * lambda) negated exp negated increment ]
 ]
 
 { #category : 'initialization' }
@@ -31,7 +31,7 @@ RandomExponential >> lambda: anObject [
 	lambda := anObject
 ]
 
-{ #category : 'initialization' }
+{ #category : 'accessing' }
 RandomExponential >> next [
 
 	^ (1.0 - super next) ln negated / lambda
