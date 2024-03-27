@@ -9,7 +9,7 @@ Class {
 	#tag : 'Basic'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLine [
 	"lines"
 
@@ -35,7 +35,7 @@ RSdeCasteljauExamples >> example44deCasteljauLine [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineAsBeziers [
 	"lines"
 
@@ -60,7 +60,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineAsBeziers [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineBernsteinBase [
 	"lines"
 
@@ -84,7 +84,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineBernsteinBase [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineClosedControlPoints [
 	"lines"
 
@@ -97,7 +97,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineClosedControlPoints [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineClosedControlPointsArcLengthParameterized [
 	"lines"
 
@@ -112,7 +112,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineClosedControlPointsArcLengthPar
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineDegreeElevation [
 	"lines"
 
@@ -132,7 +132,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineDegreeElevation [
 			  yourself ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineDerivative [
 	"lines"
 
@@ -161,7 +161,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineDerivative [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineDifference [
 	"lines"
 
@@ -189,7 +189,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineDifference [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineJunctionLeft [
 	"lines"
 
@@ -224,7 +224,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineJunctionLeft [
 			  yourself ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineJunctionRight [
 	"lines"
 
@@ -262,7 +262,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineJunctionRight [
 			  yourself ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineNoteBox [
 	"lines"
 
@@ -277,7 +277,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineNoteBox [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineNoteBoxDegreeElevation [
 	"lines"
 
@@ -291,7 +291,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineNoteBoxDegreeElevation [
 			  yourself ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineNoteBoxJunctionOfFourBeziers [
 	"lines"
 
@@ -366,7 +366,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineNoteBoxJunctionOfFourBeziers [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenC [
 	"lines"
 
@@ -386,7 +386,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenC [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenQ [
 	"lines"
 
@@ -406,7 +406,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenQ [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenQuote [
 	"lines"
 
@@ -435,7 +435,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenQuote [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenS [
 	"lines"
 
@@ -456,7 +456,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenS [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenT [
 	"lines"
 
@@ -477,7 +477,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenT [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePenTwoLines [
 	"lines"
 
@@ -518,7 +518,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePenTwoLines [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLinePolar [
 	"lines"
 
@@ -544,7 +544,7 @@ RSdeCasteljauExamples >> example44deCasteljauLinePolar [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineReflection [
 	"lines"
 
@@ -578,7 +578,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineReflection [
 			  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineRepeatedControlPoint [
 	"lines"
 
@@ -616,7 +616,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineRepeatedControlPoint [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineReversed [
 	"lines"
 
@@ -641,7 +641,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineReversed [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauLineSplitAt [
 	"lines"
 
@@ -670,7 +670,7 @@ RSdeCasteljauExamples >> example44deCasteljauLineSplitAt [
 				  yourself ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example44deCasteljauRationalLineClosedControlPoints [
 	"lines"
 
@@ -712,7 +712,7 @@ RSdeCasteljauExamples >> example44deCasteljauRationalLineClosedControlPoints [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example46NoteInteger [
 	"lines"
 
@@ -724,7 +724,7 @@ RSdeCasteljauExamples >> example46NoteInteger [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'examples' }
 RSdeCasteljauExamples >> example46NoteLoremIpsum [
 	"lines"
 
@@ -736,7 +736,7 @@ RSdeCasteljauExamples >> example46NoteLoremIpsum [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'shapes' }
 RSdeCasteljauExamples >> lineDeCasteljauLineClosedControlPoints [
 	"lines"
 
@@ -755,7 +755,7 @@ RSdeCasteljauExamples >> lineDeCasteljauLineClosedControlPoints [
 		  scale: 100
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'shapes' }
 RSdeCasteljauExamples >> lineDeCasteljauLineNoteBox [
 	"lines"
 
@@ -789,7 +789,7 @@ RSdeCasteljauExamples >> lineDeCasteljauLineNoteBox [
 		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'shapes' }
 RSdeCasteljauExamples >> linesDeCasteljauLineDegreeElevation [
 	"lines"
 
@@ -816,7 +816,7 @@ RSdeCasteljauExamples >> linesDeCasteljauLineDegreeElevation [
 		  with: bspline4
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'shapes' }
 RSdeCasteljauExamples >> noteInteger [
 	"lines"
 
@@ -826,7 +826,7 @@ RSdeCasteljauExamples >> noteInteger [
 		  notedWithPad: Float goldenPlatinumRatio
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'shapes' }
 RSdeCasteljauExamples >> noteLoremIpsum [
 	"lines"
 
