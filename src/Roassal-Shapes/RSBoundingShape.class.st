@@ -116,6 +116,16 @@ RSBoundingShape >> basicTranslateBy: delta [
 	self updateLinesON
 ]
 
+{ #category : 'composing' }
+RSBoundingShape >> boxedWithPad: aPadding [
+	"*Roassal3-Layouts"
+
+	^ self padded: aPadding withBoxDo: [ :box |
+		  box
+			  color: Color white;
+			  borderDo: [ :aBorder | aBorder color: aBorder color translucent ] ]
+]
+
 { #category : 'accessing - computed' }
 RSBoundingShape >> computeEncompassingRectangle [
 	^ self computeEncompassingRectangleFor: self baseRectangleWithBorder
@@ -336,6 +346,16 @@ RSBoundingShape >> matrixDo: aBlock [
 	self resetBBox
 ]
 
+{ #category : 'composing' }
+RSBoundingShape >> notedWithPad: aPadding [
+	"*Roassal3-Layouts"
+
+	^ self padded: aPadding withNoteDo: [ :box |
+		  box
+			  color: Color white;
+			  borderDo: [ :aBorder | aBorder color: aBorder color translucent ] ]
+]
+
 { #category : 'metrics' }
 RSBoundingShape >> numberOfIncomingLines [
 	"Return the number of lines incoming to the shape"
@@ -371,6 +391,38 @@ RSBoundingShape >> outgoingNodes [
 RSBoundingShape >> outgoingShapes [
 	"Return the shapes that leaves the shape"
 	^ self outgoingLines collect: #to
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withBoxDo: aBlock [
+
+	^ self padded: aPadding shape: RSBox new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withNoteDo: aBlock [
+
+	^ self padded: aPadding shape: RSNote new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withSimplerNoteDo: aBlock [
+
+	^ self padded: aPadding shape: RSSimplerNote new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> paddedWithGoldenRatio [
+	"*Roassal3-Layouts"
+
+	| pad |
+	pad := self extent * Float silverRatio / 2 in: [ :extent |
+		       extent x max: extent y ].
+
+	^ RSComposite new
+		  shapes: { self };
+		  padding: pad;
+		  yourself
 ]
 
 { #category : 'matrix' }

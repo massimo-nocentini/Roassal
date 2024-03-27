@@ -196,6 +196,12 @@ RSAbstractLine >> dashed [
 	self dashArray: #(4)
 ]
 
+{ #category : 'style - dashes' }
+RSAbstractLine >> dotted [
+
+	self dashArray: { Float goldenRatio }
+]
+
 { #category : 'private' }
 RSAbstractLine >> encompassingPointsFor: cp [
 
