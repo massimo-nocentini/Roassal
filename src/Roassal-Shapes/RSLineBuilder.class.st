@@ -150,8 +150,72 @@ RSLineBuilder class >> directedBezier [
 ]
 
 { #category : 'instance creation' }
+RSLineBuilder class >> dovetailControlPointsController [
+	"instance creation"
+
+	^ RSHorizontalMidBlockCPAPController new
+		  midPointBlock: [ :from :to :points |
+			  | childIndex siblings index parentShape breakingDepthIndex |
+			  parentShape := to.
+			  [
+			  childIndex := parentShape propertyAt: #childIndex.
+			  siblings := parentShape propertyAt: #siblings.
+			  childIndex isNil or: [ siblings isNil ] ] whileTrue: [
+					  parentShape := parentShape parent ].
+
+			  parentShape := from.
+			  [
+			  breakingDepthIndex := [
+			                        parentShape propertyAt: #breakingDepthIndex ]
+				                        onDNU: #propertyAt:
+				                        do: [ siblings size ] ] whileNil: [
+					  parentShape := parentShape parent ].
+
+			  index := points last y > points first y
+				           ifTrue: [ siblings size - childIndex + 1 ]
+				           ifFalse: [ childIndex ].
+
+			  index / (breakingDepthIndex + 1) ];
+		  yourself
+]
+
+{ #category : 'instance creation' }
 RSLineBuilder class >> horizontalBezier [
 	^ self horizontalLine: RSBezier new
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder class >> horizontalDeCasteljauSegmentedLine [
+	"instance creation"
+
+	| aRSLineBuilder |
+	aRSLineBuilder := self new.
+
+	^ aRSLineBuilder horizontalDovetailSegmentedLine:
+		  (RSSegmentedPolyline new
+			   lineBlock: [ :anArrayOfPoints |
+				   RSdeCasteljauLine new
+					   samplesChebyshev: anArrayOfPoints size;
+					   controlPoints: anArrayOfPoints;
+					   yourself ];
+			   junctionBlock: [ :aLine :each |
+				   aLine
+					   junction: each
+					   right: [ :c0Line :c1Line :c2Line | c1Line ] ];
+			   yourself)
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder class >> horizontalDovetailSegmentedLine: aLine [
+	"instance creation"
+
+	| aRSLineBuilder |
+	aRSLineBuilder := self new.
+
+	^ aRSLineBuilder
+		  horizontalSegmentedLine: aLine
+		  controlPointsController:
+		  aRSLineBuilder dovetailControlPointsController
 ]
 
 { #category : 'instance creation' }
@@ -159,6 +223,51 @@ RSLineBuilder class >> horizontalLine: aShape [
 	^ (self new: aShape)
 		controlPointsController: RSHorizontalCPAPController new;
 		yourself
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder class >> horizontalSegmentedBezierLine [
+	"instance creation"
+
+	| aRSLineBuilder |
+	aRSLineBuilder := self new.
+
+	^ (aRSLineBuilder horizontalLine: RSSegmentedBeziersPolyline new)
+		  controlPointsController:
+			  aRSLineBuilder dovetailControlPointsController;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder class >> horizontalSegmentedLine: aLine [
+	"instance creation"
+
+	| aRSLineBuilder |
+	aRSLineBuilder := self new.
+
+	^ aRSLineBuilder
+		  horizontalSegmentedLine: aLine
+		  controlPointsController: RSHorizontalCPAPController new
+]
+
+{ #category : 'instance creation' }
+RSLineBuilder class >> horizontalSegmentedLine: aLine controlPointsController: cpapController [
+
+	| controller predicate aRSLineBuilder |
+	aRSLineBuilder := self new.
+	controller := RSSegmentedCPAPController new
+		              controlPointsController: cpapController;
+		              yourself.
+
+	"Keep a reference to the original predicate."
+	predicate := controller linearizationPredicate.
+
+	controller linearizationPredicate: [ :from :to |
+		(predicate value: from value: to) or: [ (from y - to y) abs <= 10 ] ].
+
+	^ (aRSLineBuilder new: aLine)
+		  controlPointsController: controller;
+		  yourself
 ]
 
 { #category : 'instance creation' }
@@ -361,36 +470,6 @@ RSLineBuilder >> createEdgeIfNecessaryFrom: fromShape to: toShape [
 		ifTrue: [ createdEdges add: (self edgeFrom: fromShape to: toShape) ]
 ]
 
-{ #category : 'instance creation' }
-RSLineBuilder >> dovetailControlPointsController [
-	"instance creation"
-
-	^ RSHorizontalMidBlockCPAPController new
-		  midPointBlock: [ :from :to :points |
-			  | childIndex siblings index parentShape breakingDepthIndex |
-			  parentShape := to.
-			  [
-			  childIndex := parentShape propertyAt: #childIndex.
-			  siblings := parentShape propertyAt: #siblings.
-			  childIndex isNil or: [ siblings isNil ] ] whileTrue: [
-					  parentShape := parentShape parent ].
-
-			  parentShape := from.
-			  [
-			  breakingDepthIndex := [
-			                        parentShape propertyAt: #breakingDepthIndex ]
-				                        onDNU: #propertyAt:
-				                        do: [ siblings size ] ] whileNil: [
-					  parentShape := parentShape parent ].
-
-			  index := points last y > points first y
-				           ifTrue: [ siblings size - childIndex + 1 ]
-				           ifFalse: [ childIndex ].
-
-			  index / (breakingDepthIndex + 1) ];
-		  yourself
-]
-
 { #category : 'private - utility' }
 RSLineBuilder >> edgeFrom: source to: target [
 	"source and target are elements"
@@ -437,69 +516,6 @@ RSLineBuilder >> fromShapes: someShapes [
 	self assert: [ someShapes allSatisfy: [ :s | s class inheritsFrom: RSShape ] ] description: 'Need to provide a collection of RSShape'.
 	self assert: [ someShapes allSatisfy: #hasModel ] description: 'All shapes must have a model, else lines cannot be properly defined'.
 	fromShapes := someShapes asGroup
-]
-
-{ #category : 'instance creation' }
-RSLineBuilder >> horizontalDeCasteljauSegmentedLine [
-	"instance creation"
-
-	^ self horizontalDovetailSegmentedLine: (RSSegmentedPolyline new
-			   lineBlock: [ :anArrayOfPoints |
-				   RSdeCasteljauLine new
-					   samplesChebyshev: anArrayOfPoints size;
-					   controlPoints: anArrayOfPoints;
-					   yourself ];
-			   junctionBlock: [ :aLine :each |
-				   aLine
-					   junction: each
-					   right: [ :c0Line :c1Line :c2Line | c1Line ] ];
-			   yourself)
-]
-
-{ #category : 'instance creation' }
-RSLineBuilder >> horizontalDovetailSegmentedLine: aLine [
-	"instance creation"
-
-	^ self
-		  horizontalSegmentedLine: aLine
-		  controlPointsController: self dovetailControlPointsController
-]
-
-{ #category : 'instance creation' }
-RSLineBuilder >> horizontalSegmentedBezierLine [
-	"instance creation"
-
-	^ (self horizontalLine: RSSegmentedBeziersPolyline new)
-		  controlPointsController: self dovetailControlPointsController;
-		  yourself
-]
-
-{ #category : 'instance creation' }
-RSLineBuilder >> horizontalSegmentedLine: aLine [
-	"instance creation"
-
-	^ self
-		  horizontalSegmentedLine: aLine
-		  controlPointsController: RSHorizontalCPAPController new
-]
-
-{ #category : 'instance creation' }
-RSLineBuilder >> horizontalSegmentedLine: aLine controlPointsController: cpapController [
-
-	| controller predicate |
-	controller := RSSegmentedCPAPController new
-		              controlPointsController: cpapController;
-		              yourself.
-
-	"Keep a reference to the original predicate."
-	predicate := controller linearizationPredicate.
-
-	controller linearizationPredicate: [ :from :to |
-		(predicate value: from value: to) or: [ (from y - to y) abs <= 10 ] ].
-
-	^ (self new: aLine)
-		  controlPointsController: controller;
-		  yourself
 ]
 
 { #category : 'initialization' }
