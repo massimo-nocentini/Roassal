@@ -188,11 +188,7 @@ RSLineBuilder class >> horizontalBezier [
 RSLineBuilder class >> horizontalDeCasteljauSegmentedLine [
 	"instance creation"
 
-	| aRSLineBuilder |
-	aRSLineBuilder := self new.
-
-	^ aRSLineBuilder horizontalDovetailSegmentedLine:
-		  (RSSegmentedPolyline new
+	^ self horizontalDovetailSegmentedLine: (RSSegmentedPolyline new
 			   lineBlock: [ :anArrayOfPoints |
 				   RSdeCasteljauLine new
 					   samplesChebyshev: anArrayOfPoints size;
@@ -209,13 +205,9 @@ RSLineBuilder class >> horizontalDeCasteljauSegmentedLine [
 RSLineBuilder class >> horizontalDovetailSegmentedLine: aLine [
 	"instance creation"
 
-	| aRSLineBuilder |
-	aRSLineBuilder := self new.
-
-	^ aRSLineBuilder
+	^ self
 		  horizontalSegmentedLine: aLine
-		  controlPointsController:
-		  aRSLineBuilder dovetailControlPointsController
+		  controlPointsController: self dovetailControlPointsController
 ]
 
 { #category : 'instance creation' }
@@ -229,12 +221,8 @@ RSLineBuilder class >> horizontalLine: aShape [
 RSLineBuilder class >> horizontalSegmentedBezierLine [
 	"instance creation"
 
-	| aRSLineBuilder |
-	aRSLineBuilder := self new.
-
-	^ (aRSLineBuilder horizontalLine: RSSegmentedBeziersPolyline new)
-		  controlPointsController:
-			  aRSLineBuilder dovetailControlPointsController;
+	^ (self horizontalLine: RSSegmentedBeziersPolyline new)
+		  controlPointsController: self dovetailControlPointsController;
 		  yourself
 ]
 
@@ -242,10 +230,7 @@ RSLineBuilder class >> horizontalSegmentedBezierLine [
 RSLineBuilder class >> horizontalSegmentedLine: aLine [
 	"instance creation"
 
-	| aRSLineBuilder |
-	aRSLineBuilder := self new.
-
-	^ aRSLineBuilder
+	^ self
 		  horizontalSegmentedLine: aLine
 		  controlPointsController: RSHorizontalCPAPController new
 ]
@@ -253,8 +238,7 @@ RSLineBuilder class >> horizontalSegmentedLine: aLine [
 { #category : 'instance creation' }
 RSLineBuilder class >> horizontalSegmentedLine: aLine controlPointsController: cpapController [
 
-	| controller predicate aRSLineBuilder |
-	aRSLineBuilder := self new.
+	| controller predicate |
 	controller := RSSegmentedCPAPController new
 		              controlPointsController: cpapController;
 		              yourself.
@@ -265,7 +249,7 @@ RSLineBuilder class >> horizontalSegmentedLine: aLine controlPointsController: c
 	controller linearizationPredicate: [ :from :to |
 		(predicate value: from value: to) or: [ (from y - to y) abs <= 10 ] ].
 
-	^ (aRSLineBuilder new: aLine)
+	^ (self new: aLine)
 		  controlPointsController: controller;
 		  yourself
 ]
