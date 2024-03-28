@@ -105,7 +105,6 @@ BaselineOfRoassal >> bloc: spec [
 { #category : 'API-packages' }
 BaselineOfRoassal >> corePackagesNames [
 	^ #(
-	'Roassal-Utils'
 	'Roassal-Event'
 	'Roassal-Builders'
 	'Roassal-Shapes'
@@ -171,20 +170,20 @@ BaselineOfRoassal >> geometry: spec [
 BaselineOfRoassal >> layouts: spec [
 	spec
 		baseline: 'RoassalLayouts'
-		with: [ spec repository: 'github://pharo-graphics/RoassalLayouts/src' ]
+		with: [ spec repository: 'github://pharo-graphics/RoassalLayouts:v1.01/src' ]
 ]
 
 { #category : 'dependencies' }
 BaselineOfRoassal >> numeric: spec [
 	spec baseline: 'NumericScales'with: [ 
-		spec repository: 'github://pharo-graphics/NumericScales/src' ].
+		spec repository: 'github://pharo-graphics/NumericScales:v1.03/src' ].
 ]
 
 { #category : 'dependencies' }
 BaselineOfRoassal >> rtree: spec [
 	spec
 		baseline: 'RTree'
-		with: [ spec repository: 'github://pharo-graphics/RTree/src' ]
+		with: [ spec repository: 'github://pharo-graphics/RTree:v1.01/src' ]
 ]
 
 { #category : 'dependencies' }
@@ -207,6 +206,5 @@ BaselineOfRoassal >> testPackagesNames [
 	'Roassal-Inspector-Tests'
 	'Roassal-BaselineMap-Tests'
 	'Roassal-SVG-Tests'
-	'Roassal-Utils-Tests'
 	)
 ]
