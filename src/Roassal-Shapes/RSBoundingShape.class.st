@@ -393,6 +393,28 @@ RSBoundingShape >> outgoingShapes [
 	^ self outgoingLines collect: #to
 ]
 
+{ #category : 'as yet unclassified' }
+RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
+
+	| box |
+	box := boxShape
+		       extent: self extent + (aPadding * 2);
+		       cornerRadius: aPadding;
+		       yourself.
+
+	aBlock cull: box cull: self.
+
+	RSLocation new
+		center;
+		stick: box on: self.
+
+	^ RSComposite new
+		  shapes: {
+				  box.
+				  self };
+		  yourself
+]
+
 { #category : 'composing' }
 RSBoundingShape >> padded: aPadding withBoxDo: aBlock [
 
