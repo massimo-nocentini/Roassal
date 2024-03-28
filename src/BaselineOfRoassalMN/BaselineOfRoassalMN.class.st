@@ -1,8 +1,11 @@
+"
+Baseline for https://github.com/massimo-nocentini/Roassal
+"
 Class {
 	#name : 'BaselineOfRoassalMN',
 	#superclass : 'BaselineOfRoassal',
-	#category : 'BaselineOfRoassal',
-	#package : 'BaselineOfRoassal'
+	#category : 'BaselineOfRoassalMN',
+	#package : 'BaselineOfRoassalMN'
 }
 
 { #category : 'API-packages' }
