@@ -84,7 +84,7 @@ RSCairoCachedMetricsProvider >> widthOf: char map: map font: aLogicalFont [
 			glyphs := CairoFontMetricsProvider new
 				font: aLogicalFont;
 				glyphsOf: char asString.
-			rawExt := CairoTextExtents new.
+			rawExt := self textExtent.
 			cairoFont := CairoScaledFont fromFreetypeFont: aLogicalFont asFreetypeFont.
 			cairoFont getExtentsOfGlyphs: glyphs getHandle ofLength: glyphs size into: rawExt.
 			rawExt x_advance

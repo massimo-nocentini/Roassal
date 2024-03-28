@@ -14,9 +14,15 @@ RSCairoFitMetricsProvider >> extentsOf: aRSLabel [
 	| rawExt cairoFont glyphs |
 	cairoFont := aRSLabel cairoFont.
 	glyphs := aRSLabel cairoGlyphs.
-	rawExt := CairoTextExtents new.
+	rawExt := self textExtent.
 	cairoFont getExtentsOfGlyphs: glyphs getHandle ofLength: glyphs size into: rawExt.
 	^ RSTextExtents new
 		from: rawExt;
 		yourself
+]
+
+{ #category : 'hooks' }
+RSCairoFitMetricsProvider >> textExtent [
+
+	^ CairoTextExtentsBySlots new "Instead of CairoTextExtents"
 ]
