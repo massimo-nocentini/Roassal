@@ -13,6 +13,13 @@ Class {
 	#tag : 'Lines'
 }
 
+{ #category : 'testing' }
+RSParametricLine class >> isAbstract [
+	"testing"
+
+	^ true
+]
+
 { #category : 'accessing' }
 RSParametricLine >> arcLengthParameterization [
 	"accessing"
