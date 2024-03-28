@@ -8,6 +8,14 @@ Class {
 	#package : 'BaselineOfRoassalMN'
 }
 
+{ #category : 'baselines' }
+BaselineOfRoassalMN >> baseline: spec [
+	"https://github.com/massimo-nocentini/Roassal"
+
+	<baseline>
+	^ super baseline: spec
+]
+
 { #category : 'API-packages' }
 BaselineOfRoassalMN >> corePackagesNames [
 
