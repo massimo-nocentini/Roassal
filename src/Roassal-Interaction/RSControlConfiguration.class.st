@@ -29,10 +29,10 @@ RSControlConfiguration >> initialize [
 		minScale: 0.04;
 		"used in zoom in"
 		maxScale: 7;
-		padding: 25;
+		padding: Float goldenRatio * 10;
 		withLegend;
 		noBasicZoom;
-		shouldAnimateZoom: true
+		shouldAnimateZoom: false
 ]
 
 { #category : 'accessing' }
