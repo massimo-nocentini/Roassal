@@ -17,6 +17,18 @@ Point >> distanceToOrigin [
 ]
 
 { #category : '*Roassal-Utils' }
+Point >> halved [
+
+	^ self x halved @ self y halved
+]
+
+{ #category : '*Roassal-Utils' }
+Point >> halvedAsFloat [
+
+	^ self x halved asFloat @ self y halved asFloat
+]
+
+{ #category : '*Roassal-Utils' }
 Point >> unitAffine: aPoint at: aParam [
 
 	| t |

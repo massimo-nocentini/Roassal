@@ -31,6 +31,12 @@ Float class >> goldenRatio [
 ]
 
 { #category : '*Roassal-Utils' }
+Float >> halved [
+
+	^ self * 0.5
+]
+
+{ #category : '*Roassal-Utils' }
 Float >> increment [
 
 	^ self + 1.0
