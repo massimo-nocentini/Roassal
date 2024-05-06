@@ -398,7 +398,7 @@ RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
 
 	| box |
 	box := boxShape
-		       extent: self extent + (aPadding * 2);
+		       extent: self extent + aPadding doubled;
 		       cornerRadius: aPadding;
 		       yourself.
 
@@ -408,11 +408,10 @@ RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
 		center;
 		stick: box on: self.
 
-	^ RSComposite new
-		  shapes: {
-				  box.
-				  self };
-		  yourself
+	^ RSGroup new
+		  add: box;
+		  add: self;
+		  asShape
 ]
 
 { #category : 'composing' }
