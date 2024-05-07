@@ -181,6 +181,14 @@ RSShape >> announcementClasses [
 		reject: [ :subcls| subcls hasSubclasses ]
 ]
 
+{ #category : 'converting' }
+RSShape >> asCompositeShape [
+
+	^ RSGroup new
+		  add: self;
+		  asShapeFor: self model
+]
+
 { #category : 'transforming' }
 RSShape >> basicTranslateBy: delta [
 	^ self subclassResponsibility
