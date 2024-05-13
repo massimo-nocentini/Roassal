@@ -294,18 +294,46 @@ RSShape >> computeEncompassingRectangle [
 
 { #category : 'accessing - computed' }
 RSShape >> computeEncompassingRectangleFor: rect matrix: aMatrix [
-	| groupOfPoints |
-	groupOfPoints := #(topLeft topRight bottomRight bottomLeft)
-		collect: [ :s | aMatrix transform: (s value: rect) ].
-	^ Rectangle encompassing: groupOfPoints
+
+	| topLeft bottomRight p |
+	p := aMatrix transform: rect topLeft.
+	topLeft := bottomRight := p.
+
+	p := aMatrix transform: rect topRight.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	p := aMatrix transform: rect bottomRight.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	p := aMatrix transform: rect bottomLeft.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	^ topLeft corner: bottomRight
 ]
 
 { #category : 'accessing - computed' }
 RSShape >> computeInverseEncompassingRectangleFor: rect matrix: aMatrix [
-	| groupOfPoints |
-	groupOfPoints := #(topLeft topRight bottomRight bottomLeft)
-		collect: [ :s | aMatrix inverseTransform: (s value: rect) ].
-	^ Rectangle encompassing: groupOfPoints
+
+	| topLeft bottomRight p |
+	p := aMatrix inverseTransform: rect topLeft.
+	topLeft := bottomRight := p.
+
+	p := aMatrix inverseTransform: rect topRight.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	p := aMatrix inverseTransform: rect bottomRight.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	p := aMatrix inverseTransform: rect bottomLeft.
+	topLeft := topLeft min: p.
+	bottomRight := bottomRight max: p.
+
+	^ topLeft corner: bottomRight
 ]
 
 { #category : 'copying' }

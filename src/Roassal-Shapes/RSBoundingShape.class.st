@@ -103,9 +103,11 @@ RSBoundingShape >> baseRectangle [
 
 { #category : 'accessing - computed' }
 RSBoundingShape >> baseRectangleWithBorder [
+
 	| rectangle |
 	rectangle := self baseRectangle.
-	self hasBorder ifTrue: [ rectangle := rectangle expandBy: border width2 ].
+	self hasBorder ifTrue: [
+		rectangle := rectangle expandBy: border width halved ].
 	^ rectangle
 ]
 
@@ -175,21 +177,24 @@ RSBoundingShape >> extent [
 
 { #category : 'accessing' }
 RSBoundingShape >> extent: aPoint [
+
 	| oldExtent extent delta |
-	
 	extent := self baseRectangleWithBorder extent.
 	extent = aPoint ifTrue: [ ^ self ].
 	self assert: aPoint isPoint.
 	oldExtent := extent.
 	delta := self hasBorder
-		ifTrue: [ border width ]
-		ifFalse: [ 0 ].
-	baseRectangle := Rectangle floatCenter: 0@0 extent: aPoint - delta.
-	self resetBBox; resetPath.
-	self announce: [ RSExtentChangedEvent new
-		shape: self;
-		oldExtent: oldExtent;
-		newExtent: extent ]
+		         ifTrue: [ border width ]
+		         ifFalse: [ 0 ].
+	baseRectangle := Rectangle at00extent: aPoint - delta.
+	self
+		resetBBox;
+		resetPath.
+	self announce: [
+		RSExtentChangedEvent new
+			shape: self;
+			oldExtent: oldExtent;
+			newExtent: extent ]
 ]
 
 { #category : 'initialization' }
