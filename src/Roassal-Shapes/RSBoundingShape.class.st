@@ -157,6 +157,15 @@ RSBoundingShape >> connectedLines: aCollection [
 ]
 
 { #category : 'defaults' }
+RSBoundingShape >> defaultBaseRectangle [
+
+	| o |
+	o := 0 @ 0.
+
+	^ o corner: o
+]
+
+{ #category : 'defaults' }
 RSBoundingShape >> defaultExtent [
 	^ 10@10
 ]
@@ -299,11 +308,15 @@ RSBoundingShape >> incomingShapes [
 
 { #category : 'initialization' }
 RSBoundingShape >> initialize [
-	super initialize.
-	self initializeMatrix; updateEdgesON.
 
-	baseRectangle := 0@0 corner: 0@0.
-	self extent: self defaultExtent
+	super initialize.
+
+	baseRectangle := self defaultBaseRectangle.
+
+	self
+		initializeMatrix;
+		updateEdgesON;
+		extent: self defaultExtent
 ]
 
 { #category : 'initialization' }
@@ -398,7 +411,7 @@ RSBoundingShape >> outgoingShapes [
 	^ self outgoingLines collect: #to
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'composing' }
 RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
 
 	| box |
