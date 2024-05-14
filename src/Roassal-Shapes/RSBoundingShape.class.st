@@ -195,7 +195,7 @@ RSBoundingShape >> extent: aPoint [
 	delta := self hasBorder
 		         ifTrue: [ border width ]
 		         ifFalse: [ 0 ].
-	baseRectangle := Rectangle at00extent: aPoint - delta.
+	baseRectangle := Rectangle extentCenteredAtCartesianOrigin: aPoint - delta.
 	self
 		resetBBox;
 		resetPath.
