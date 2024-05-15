@@ -69,6 +69,12 @@ RSAthensMorph >> createSurface [
 ]
 
 { #category : 'drawing' }
+RSAthensMorph >> createSurfaceIfHadBeenFreed [
+
+	surface getHandle isNull ifTrue: [ self createSurface ]
+]
+
+{ #category : 'drawing' }
 RSAthensMorph >> drawOn: aCanvas [
 	"Draw the whole visualization"
 	isDrawing ifTrue: [ ^ self ].
@@ -83,9 +89,7 @@ RSAthensMorph >> drawOn: aCanvas [
 			borderStyle: self borderStyle.
 		roassalCanvas playAnimations.
 		self drawShapes.
-
-		surface hasBeenFreed
-			ifTrue: [ self createSurface ].
+		self createSurfaceIfHadBeenFreed.
 		[ SystemVersion current major >= 12
 			ifTrue: [
 				aCanvas
@@ -158,8 +162,8 @@ RSAthensMorph >> fullDrawOnAthensCanvas: aCanvas [
 		aCanvas drawShape: (bounds translateBy: bounds origin negated).
 		roassalCanvas playAnimations.
 		self drawShapes.
-		surface hasBeenFreed ifTrue: [ self createSurface ].
-
+		self createSurfaceIfHadBeenFreed.
+		
 		aCanvas pathTransform restoreAfter: [
 			aCanvas pathTransform loadIdentity.
 			aCanvas paintMode restoreAfter: [
