@@ -184,9 +184,15 @@ RSShape >> announcementClasses [
 { #category : 'converting' }
 RSShape >> asCompositeShape [
 
+	^ self asGroup asShapeFor: self model
+]
+
+{ #category : 'converting' }
+RSShape >> asGroup [
+
 	^ RSGroup new
 		  add: self;
-		  asShapeFor: self model
+		  yourself
 ]
 
 { #category : 'transforming' }
