@@ -1047,6 +1047,31 @@ RSAthensRenderer >> visitLine: line [
 ]
 
 { #category : 'visiting - helpers' }
+RSAthensRenderer >> visitShape: aShape withScaledMatrixDo: aBlock [
+
+	self visitShapeIfNecessary: aShape block: [
+		| lbtranslation |
+		lbtranslation := aShape extent halvedAsFloat negated.
+
+		matrix translateBy: lbtranslation.
+
+		self pathTransformLoadMatrix.
+
+		athensCanvas setPathMatrix.
+
+		(aShape paint asAthensPaintOn: athensCanvas) loadOnCairoCanvas:
+			athensCanvas.
+
+		aBlock cull: aShape.
+
+		athensCanvas pathTransform translateBy: lbtranslation negated.
+
+		self showEncompassingRectangleIfNecessary: aShape.
+
+		aShape isDirty: false ]
+]
+
+{ #category : 'visiting - helpers' }
 RSAthensRenderer >> visitShapeIfNecessary: shape block: aBlock [
 	matrix restoreAfter: [
 		| shapeMatrix |
