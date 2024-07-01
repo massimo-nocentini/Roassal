@@ -821,7 +821,7 @@ RSdeCasteljauExamples >> noteInteger [
 	"lines"
 
 	^ RSLabel new
-		  model: 541;
+		  model: Number firstCarmichaelNumber;
 		  useDefaultCodeFont;
 		  notedWithPad: Float goldenPlatinumRatio
 ]

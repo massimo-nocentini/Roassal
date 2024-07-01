@@ -19,6 +19,24 @@ Number >> doubled [
 ]
 
 { #category : '*Roassal-Utils' }
+Number class >> fifthCarmichaelNumber [
+
+	^ 2821
+]
+
+{ #category : '*Roassal-Utils' }
+Number class >> firstCarmichaelNumber [
+
+	^ 561
+]
+
+{ #category : '*Roassal-Utils' }
+Number class >> fourthCarmichaelNumber [
+
+	^ 2465
+]
+
+{ #category : '*Roassal-Utils' }
 Number >> halved [
 
 	^ self / 2
@@ -28,4 +46,16 @@ Number >> halved [
 Number >> increment [
 
 	^ self + 1
+]
+
+{ #category : '*Roassal-Utils' }
+Number class >> secondCarmichaelNumber [
+
+	^ 1105
+]
+
+{ #category : '*Roassal-Utils' }
+Number class >> thirdCarmichaelNumber [
+
+	^ 1729
 ]

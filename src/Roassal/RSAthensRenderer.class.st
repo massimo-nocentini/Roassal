@@ -255,25 +255,15 @@ RSAthensRenderer >> buildLinePath: line [
 
 { #category : 'creating path' }
 RSAthensRenderer >> buildNotePath: aNoteShape [
-	"creating path"
 
-	| n rectangle random left lPoints bPoints rPoints tPoints bottom right top coin block m nSamples mSamples finalLine radius ratio |
+	| n rectangle random left lPoints bPoints rPoints tPoints bottom right top block m nSamples mSamples finalLine radius ratio cp lcp bcp rcp tcp designRect |
 	rectangle := aNoteShape baseRectangle.
-
-	random := RandomGaussian new.
-
-	coin := RandomBernoulli new
-		        p: 0.6;
-		        yourself.
-
-	block := [ :c0 :c1 :c2 | coin ifHead: [ c1 ] ifTail: [ c2 ] ].
+	random := aNoteShape randomGaussian.
+	block := aNoteShape coinBlock.
 
 	radius := aNoteShape hasCornerRadius
 		          ifTrue: [ aNoteShape cornerRadius ]
-		          ifFalse: [
-			          RSCornerRadius new
-				          radius: 0;
-				          yourself ].
+		          ifFalse: [ aNoteShape defaultCornerRadius ].
 
 	n := rectangle height max: 1.
 	m := rectangle width max: 1.
@@ -305,6 +295,18 @@ RSAthensRenderer >> buildNotePath: aNoteShape [
 	             rectangle left + radius topLeft) chebyshev: m) collect: [
 		           :each | each @ (rectangle top + random next) ].
 
+	"designRect := {
+		              lPoints.
+		              rPoints.
+		              bPoints.
+		              tPoints }
+		              inject: (0 @ 0 corner: 0 @ 0)
+		              into: [ :r :designPoints |
+			              r encompass:
+				              (Rectangle encompassing: designPoints) extent ].
+
+	aNoteShape extent: designRect extent."
+
 	nSamples := n << 2.
 	mSamples := m << 2.
 
@@ -333,10 +335,22 @@ RSAthensRenderer >> buildNotePath: aNoteShape [
 	top := right junction: top right: block.
 	left := top junction: left right: block.
 
+	lcp := left controlPoints.
+	bcp := bottom controlPoints.
+	rcp := right controlPoints.
+	tcp := top controlPoints.
+
+	cp := Array
+		      new: lcp size + bcp size + rcp size + tcp size
+		      streamContents: [ :stream |
+			      stream
+				      nextPutAll: lcp;
+				      nextPutAll: bcp;
+				      nextPutAll: rcp;
+				      nextPutAll: tcp ].
+
 	finalLine := RSPolyline new
-		             controlPoints:
-			             left controlPoints , bottom controlPoints
-			             , right controlPoints , top controlPoints;
+		             controlPoints: cp;
 		             yourself.
 
 	self buildPolylinePath: finalLine
