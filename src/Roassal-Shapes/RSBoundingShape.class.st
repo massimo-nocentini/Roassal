@@ -101,6 +101,12 @@ RSBoundingShape >> baseRectangle [
 	^ baseRectangle
 ]
 
+{ #category : 'accessing' }
+RSBoundingShape >> baseRectangleAtPoint: aPoint [
+
+	^ Rectangle extentCenteredAtCartesianOrigin: aPoint
+]
+
 { #category : 'accessing - computed' }
 RSBoundingShape >> baseRectangleWithBorder [
 
@@ -195,7 +201,7 @@ RSBoundingShape >> extent: aPoint [
 	delta := self hasBorder
 		         ifTrue: [ border width ]
 		         ifFalse: [ 0 ].
-	baseRectangle := Rectangle extentCenteredAtCartesianOrigin: aPoint - delta.
+	baseRectangle := self baseRectangleAtPoint: aPoint - delta.
 	self
 		resetBBox;
 		resetPath.
@@ -416,8 +422,8 @@ RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
 
 	| box |
 	box := boxShape
-		       extent: self extent + aPadding doubled;
 		       cornerRadius: aPadding;
+		       extent: self extent + aPadding doubled;
 		       yourself.
 
 	aBlock cull: box cull: self.
