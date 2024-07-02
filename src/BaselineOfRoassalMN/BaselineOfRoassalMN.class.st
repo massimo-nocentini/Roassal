@@ -19,7 +19,7 @@ BaselineOfRoassalMN >> baseline: spec [
 { #category : 'API-packages' }
 BaselineOfRoassalMN >> corePackagesNames [
 
-	^ super corePackagesNames , #( 'Roassal-Utils' )
+	^ #( 'Roassal-Utils' ) , super corePackagesNames
 ]
 
 { #category : 'dependencies' }
