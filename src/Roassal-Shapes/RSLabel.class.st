@@ -156,7 +156,8 @@ RSLabel >> createFont [
 
 { #category : 'defaults' }
 RSLabel >> defaultColor [
-	^ Color black
+
+	^ Smalltalk ui theme textColor
 ]
 
 { #category : 'accessing' }
@@ -249,7 +250,6 @@ c @ RSCanvasController
 
 { #category : 'managing font' }
 RSLabel >> fontSizeSilverRatio [
-	"managing font"
 
 	self fontSize: self fontSize * Float silverRatio
 ]

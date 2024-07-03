@@ -19,10 +19,25 @@ Class {
 		'connectedLines',
 		'shouldUpdateLines'
 	],
+	#classVars : [
+		'DefaultBaseRectangle',
+		'DefaultExtent'
+	],
 	#category : 'Roassal-Shapes-Bounding',
 	#package : 'Roassal-Shapes',
 	#tag : 'Bounding'
 }
+
+{ #category : 'class initialization' }
+RSBoundingShape class >> initialize [
+
+	| o v |
+	o := 0 @ 0.
+	DefaultBaseRectangle := o corner: o.
+
+	v := Float goldenRatio * 10.0.
+	DefaultExtent := v @ v
+]
 
 { #category : 'testing' }
 RSBoundingShape class >> isAbstract [
@@ -165,15 +180,13 @@ RSBoundingShape >> connectedLines: aCollection [
 { #category : 'defaults' }
 RSBoundingShape >> defaultBaseRectangle [
 
-	| o |
-	o := 0 @ 0.
-
-	^ o corner: o
+	^ DefaultBaseRectangle
 ]
 
 { #category : 'defaults' }
 RSBoundingShape >> defaultExtent [
-	^ 10@10
+
+	^ DefaultExtent
 ]
 
 { #category : 'accessing' }
