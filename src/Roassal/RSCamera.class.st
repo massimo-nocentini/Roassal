@@ -129,9 +129,10 @@ RSCamera >> fromSpaceToPixel: aPoint [
 
 { #category : 'initialization' }
 RSCamera >> initialize [
+
 	super initialize.
 	matrix := AthensAffineTransform new.
-	scale := 1.000000.
+	scale := 1.0.
 	originMode := RSCoordinates originCenterMiddle
 ]
 

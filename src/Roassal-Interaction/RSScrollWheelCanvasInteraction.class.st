@@ -54,12 +54,13 @@ RSScrollWheelCanvasInteraction >> initialize [
 RSScrollWheelCanvasInteraction >> move: aCanvas delta: delta [
 
 	self canvas: aCanvas animationDo: [
-		| camera p correct |
+		| camera p correct r |
+		r := 0.33333333.
 		camera := aCanvas camera.
 
 		correct := self correctCamera: camera.
 		p := (correct - camera position) abs max: 1 @ 1.
-		p := (p x raisedTo: 1 / 3) @ (p y raisedTo: 1 / 3).
+		p := (p x raisedTo: r) @ (p y raisedTo: r).
 		camera translateBy: 0 @ delta / p.
 		aCanvas signalUpdate ]
 ]
@@ -87,5 +88,5 @@ RSScrollWheelCanvasInteraction >> renderLegendOn: aLegendBuilder [
 { #category : 'events - processing' }
 RSScrollWheelCanvasInteraction >> speed [
 
-	^ Float goldenRatio
+	^ (10 * Float goldenRatio) ceiling
 ]
