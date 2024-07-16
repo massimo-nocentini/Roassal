@@ -148,8 +148,8 @@ RSRandom >> cdf: x ifLessThan: sBlock else: fBlock [
 
 { #category : 'initialization' }
 RSRandom >> initialize [
-
-	| doubleSize |
+super initialize
+	"| doubleSize |
 	self
 		longLag: 100;
 		shortLag: 37;
@@ -159,9 +159,9 @@ RSRandom >> initialize [
 	state := {
 		         (ByteArray new: self longLag * doubleSize).
 		         (ByteArray new: self quality * doubleSize).
-		         1 "the cursor" }.
+		         1 ""the cursor"" }.
 
-	self useClockBasedSeed
+	self useClockBasedSeed"
 ]
 
 { #category : 'accessing' }
@@ -179,7 +179,7 @@ RSRandom >> longLag: anObject [
 { #category : 'initialization' }
 RSRandom >> next [
 
-	<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>
+	"<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>"
 	^ super next
 ]
 
@@ -198,8 +198,8 @@ RSRandom >> quality: anObject [
 { #category : 'initialization' }
 RSRandom >> setStateFromSeed [
 
-	<primitive: 'primitive_randomknuth_start' module: 'UtilsPlugin'>
-	state := DoubleWordArray new: 1. "That's the default initialization kept from Random>>#initialize"
+	"<primitive: 'primitive_randomknuth_start' module: 'UtilsPlugin'>"
+	"state := DoubleWordArray new: 1." "That's the default initialization kept from Random>>#initialize"
 	^ super setStateFromSeed
 ]
 
