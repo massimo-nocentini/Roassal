@@ -8,13 +8,21 @@ Class {
 	#superclass : 'RSRandom',
 	#instVars : [
 		'mu',
-		'sigma',
-		'magic'
+		'sigma'
+	],
+	#classVars : [
+		'Magic'
 	],
 	#category : 'Roassal-Utils-Random',
 	#package : 'Roassal-Utils',
 	#tag : 'Random'
 }
+
+{ #category : 'class initialization' }
+RandomGaussian class >> initialize [
+
+	Magic := -0.5 exp * 4.0 / 2 sqrt
+]
 
 { #category : 'sampling' }
 RandomGaussian >> cdf: x [
@@ -26,8 +34,6 @@ RandomGaussian >> cdf: x [
 RandomGaussian >> initialize [
 
 	super initialize.
-
-	magic := -0.5 exp * 4.0 / 2 sqrt.
 
 	self
 		mu: 0.0;
@@ -49,7 +55,7 @@ RandomGaussian >> next [
 	u1 := super next.
 	u2 := 1.0 - super next.
 
-	z := magic / u2 times: -0.5 plus: u1.
+	z := Magic / u2 times: -0.5 plus: u1.
 
 	z halved squared > u2 log negated ] whileTrue.
 
