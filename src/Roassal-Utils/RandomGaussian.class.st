@@ -27,11 +27,11 @@ RandomGaussian >> initialize [
 
 	super initialize.
 
-	magic := -0.5 exp * 4 / 2 sqrt.
+	magic := -0.5 exp * 4.0 / 2 sqrt.
 
 	self
-		mu: 0;
-		sigma: 1
+		mu: 0.0;
+		sigma: 1.0
 ]
 
 { #category : 'accessing' }
@@ -49,11 +49,11 @@ RandomGaussian >> next [
 	u1 := super next.
 	u2 := 1.0 - super next.
 
-	z := u1 - 0.5 * magic / u2.
+	z := magic / u2 times: -0.5 plus: u1.
 
-	(z / 2) squared > u2 log negated ] whileTrue.
+	z halved squared > u2 log negated ] whileTrue.
 
-	^ z * sigma + mu
+	^ z times: sigma plus: mu
 ]
 
 { #category : 'accessing' }

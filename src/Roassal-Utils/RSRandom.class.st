@@ -122,11 +122,6 @@ int main()
 Class {
 	#name : 'RSRandom',
 	#superclass : 'Random',
-	#instVars : [
-		'longLag',
-		'shortLag',
-		'quality'
-	],
 	#category : 'Roassal-Utils-Random',
 	#package : 'Roassal-Utils',
 	#tag : 'Random'
@@ -148,69 +143,31 @@ RSRandom >> cdf: x ifLessThan: sBlock else: fBlock [
 
 { #category : 'initialization' }
 RSRandom >> initialize [
-super initialize
-	"| doubleSize |
-	self
-		longLag: 100;
-		shortLag: 37;
-		quality: 1009.
 
-	doubleSize := ExternalType double byteSize.
-	state := {
-		         (ByteArray new: self longLag * doubleSize).
-		         (ByteArray new: self quality * doubleSize).
-		         1 ""the cursor"" }.
+	state := self newState.
 
-	self useClockBasedSeed"
-]
-
-{ #category : 'accessing' }
-RSRandom >> longLag [
-
-	^ longLag
-]
-
-{ #category : 'accessing' }
-RSRandom >> longLag: anObject [
-
-	longLag := anObject
+	self useClockBasedSeed
 ]
 
 { #category : 'initialization' }
+RSRandom >> newState [
+
+	<primitive: 'primitive_randomknuth_init' module: 'UtilsPlugin'>
+	^ DoubleWordArray new: 1
+]
+
+{ #category : 'accessing' }
 RSRandom >> next [
 
-	"<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>"
+	<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>
+	self primitiveFailed .
 	^ super next
-]
-
-{ #category : 'accessing' }
-RSRandom >> quality [
-
-	^ quality
-]
-
-{ #category : 'accessing' }
-RSRandom >> quality: anObject [
-
-	quality := anObject
 ]
 
 { #category : 'initialization' }
 RSRandom >> setStateFromSeed [
 
-	"<primitive: 'primitive_randomknuth_start' module: 'UtilsPlugin'>"
-	"state := DoubleWordArray new: 1." "That's the default initialization kept from Random>>#initialize"
+	<primitive: 'primitive_randomknuth_start' module: 'UtilsPlugin'>
+	state := DoubleWordArray new: 1. "That's the default initialization kept from Random>>#initialize"
 	^ super setStateFromSeed
-]
-
-{ #category : 'accessing' }
-RSRandom >> shortLag [
-
-	^ shortLag
-]
-
-{ #category : 'accessing' }
-RSRandom >> shortLag: anObject [
-
-	shortLag := anObject
 ]
