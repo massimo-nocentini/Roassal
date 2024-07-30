@@ -127,6 +127,17 @@ Class {
 	#tag : 'Random'
 }
 
+{ #category : 'accessing' }
+RSRandom >> arrayOfDoublesFromByteArray: byteArray [
+
+	| array |
+	array := Array new: byteArray size / ExternalType double byteSize.
+
+	1 to: array size do: [ :i | array at: i put: (byteArray doubleAt: i) ].
+
+	^ array
+]
+
 { #category : 'sampling' }
 RSRandom >> cdf: x [
 
@@ -147,6 +158,12 @@ RSRandom >> initialize [
 	state := self newState.
 
 	self useClockBasedSeed
+]
+
+{ #category : 'accessing' }
+RSRandom >> longLagArray [
+
+	^ self arrayOfDoublesFromByteArray: (state at: 2)
 ]
 
 { #category : 'initialization' }
@@ -170,4 +187,10 @@ RSRandom >> setStateFromSeed [
 	<primitive: 'primitive_randomknuth_start' module: 'UtilsPlugin'>
 	state := DoubleWordArray new: 1. "That's the default initialization kept from Random>>#initialize"
 	^ super setStateFromSeed
+]
+
+{ #category : 'accessing' }
+RSRandom >> shortLagArray [
+
+	^ self arrayOfDoublesFromByteArray: (state at: 1)
 ]
