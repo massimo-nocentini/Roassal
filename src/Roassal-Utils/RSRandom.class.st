@@ -176,9 +176,14 @@ RSRandom >> newState [
 { #category : 'accessing' }
 RSRandom >> next [
 
+	^ self privateNextValue
+]
+
+{ #category : 'private' }
+RSRandom >> privateNextValue [
+
 	<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>
-	self primitiveFailed .
-	^ super next
+	self primitiveFailed
 ]
 
 { #category : 'initialization' }
