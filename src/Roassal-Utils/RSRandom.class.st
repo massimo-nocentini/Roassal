@@ -127,6 +127,13 @@ Class {
 	#tag : 'Random'
 }
 
+{ #category : 'private' }
+RSRandom class >> primitiveRandomNumber: stateArray [
+
+	<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>
+	self primitiveFailed
+]
+
 { #category : 'accessing' }
 RSRandom >> arrayOfDoublesFromByteArray: byteArray [
 
@@ -177,13 +184,6 @@ RSRandom >> newState [
 RSRandom >> next [
 
 	^ self privateNextValue
-]
-
-{ #category : 'private' }
-RSRandom >> privateNextValue [
-
-	<primitive: 'primitive_randomknuth_next' module: 'UtilsPlugin'>
-	self primitiveFailed
 ]
 
 { #category : 'initialization' }
