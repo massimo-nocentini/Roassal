@@ -24,5 +24,5 @@ RSCairoFitMetricsProvider >> extentsOf: aRSLabel [
 { #category : 'hooks' }
 RSCairoFitMetricsProvider >> textExtent [
 
-	^ CairoTextExtentsBySlots new "Instead of CairoTextExtents"
+	^ CairoTextExtents new
 ]
