@@ -173,6 +173,12 @@ RSRandom >> longLagArray [
 	^ self arrayOfDoublesFromByteArray: (state at: 2)
 ]
 
+{ #category : 'accessing' }
+RSRandom >> maxValue [
+
+	^ 0
+]
+
 { #category : 'initialization' }
 RSRandom >> newState [
 
