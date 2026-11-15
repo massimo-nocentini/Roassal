@@ -152,8 +152,8 @@ RSRTreeRegressionTest >> testBulkLoadedCanvasAcceptsChanges [
 RSRTreeRegressionTest >> testLineHitsAgree [
 	"the list found a line at points around its end points that are outside its rectangle, where the
 	tree, which prunes with the rectangle, did not. The points on the far border of a rectangle
-	(x = corner x or y = corner y) are left out: RTree v1.01 tests them with the half-open
-	Rectangle>>containsPoint:, so only the list finds a line there"
+	(x = corner x or y = corner y), such as the end point of a line, are found too: the point
+	queries of RTree prune with the closed rectangle"
 	| canvases |
 	canvases := self canvasesWith: [ :canvas | | a b line |
 		a := RSBox new size: 20; model: #a; yourself.
@@ -161,10 +161,16 @@ RSRTreeRegressionTest >> testLineHitsAgree [
 		line := RSLine new from: a; to: b; model: #line; yourself.
 		canvas add: a; add: b; add: line.
 		canvas add: (RSLine new startPoint: 0 @ 0; endPoint: 100 @ 0; width: 1; model: #h; yourself) ].
-	{ 0 @ 0. 50 @ 0.2. 100.3 @ 0.1. -0.3 @ 0.1. 0.3 @ 50. 0.2 @ -0.3. 0 @ 100.3 } do: [ :p |
+	{ 0 @ 0. 50 @ 0.2. 100.3 @ 0.1. -0.3 @ 0.1. 0.3 @ 50. 0.2 @ -0.3. 0 @ 100.3. 0 @ 100. 100 @ 0. 50 @ 0.5. 0.5 @ 60 } do: [ :p |
 		self assert: (self modelsAt: p in: canvases second) equals: (self modelsAt: p in: canvases first) ].
 	self assert: (self modelsAt: 0 @ 100.3 in: canvases first) equals: #( #b ).
-	self assert: (self modelsAt: 0.3 @ 50 in: canvases first) equals: #( #line )
+	self assert: (self modelsAt: 0.3 @ 50 in: canvases first) equals: #( #line ).
+	"the end point of the line between the boxes, and of the horizontal line, on the far border of
+	their rectangle"
+	self assert: (self modelsAt: 0 @ 100 in: canvases second) equals: #( #line #b ).
+	self assert: (self modelsAt: 100 @ 0 in: canvases second) equals: #( #h ).
+	self assert: (self modelsAt: 50 @ 0.5 in: canvases second) equals: #( #h ).
+	self assert: (self modelsAt: 0.5 @ 60 in: canvases second) equals: #( #line )
 ]
 
 { #category : 'tests' }
