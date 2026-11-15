@@ -205,7 +205,7 @@ RSCanvas >> canvas [
 
 { #category : 'removing' }
 RSCanvas >> clear [
-	self shapes copy do: #remove.
+	self removeShapes: self shapes.
 	self announcer: nil.
 	self signalUpdate
 ]
@@ -548,18 +548,26 @@ RSCanvas >> removeFixedShape: aShape [
 	fixedShapes remove: aShape
 ]
 
+{ #category : 'private' }
+RSCanvas >> removeBatchedFixedShapes: aSet [
+	(self removeAll: aSet from: fixedShapes)
+		ifNotEmpty: [ self renumber: fixedShapes from: 1 to: fixedShapes size ]
+]
+
 { #category : 'adding - removing shapes' }
 RSCanvas >> removeShape: shape [
-	| evt collection |
+	| evt collection index |
 	shape invalidate.
-	collection := shape isFixed
-		ifTrue: [ fixedShapes ]
-		ifFalse: [ shapes ].
-	shape isFixed
-		ifFalse: [ self shapeCollection remove: shape ].
-	collection remove: shape.
-	shape entryIndex to: collection size
-		do: [ :i | (collection at: i) entryIndex: i ].
+	(self deferRemovalOf: shape) ifFalse: [
+		collection := shape isFixed
+			ifTrue: [ fixedShapes ]
+			ifFalse: [ shapes ].
+		shape isFixed
+			ifFalse: [ self shapeCollection remove: shape ].
+		index := self indexOfShape: shape in: collection.
+		index = 0 ifTrue: [ ^ collection errorNotFound: shape ].
+		collection removeAt: index.
+		self renumber: collection from: index to: collection size ].
 	shape parent: nil.
 	evt := RSShapeRemovedEvent new
 		       shape: shape;

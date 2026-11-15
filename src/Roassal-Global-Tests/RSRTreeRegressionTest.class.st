@@ -221,3 +221,124 @@ RSRTreeRegressionTest >> testMatrixChangesResetTheBoundingBox [
 			self assert: (self modelsAt: 305 @ 300 in: canvas) equals: #( #box ).
 			self assert: (self modelsAt: 255 @ 300 in: canvas) isEmpty ]
 ]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> assertConsistent: aCanvas [
+	"the entryIndex of a shape is its index, and the shape collection holds the shapes, in the same
+	order for a list"
+	aCanvas privateShapes withIndexDo: [ :each :i |
+		self assert: each entryIndex equals: i.
+		self assert: each parent identicalTo: aCanvas ].
+	aCanvas fixedShapes withIndexDo: [ :each :i | self assert: each entryIndex equals: i ].
+	self assert: aCanvas shapeCollection size equals: aCanvas privateShapes size.
+	(aCanvas shapeCollection isKindOf: RTSequenceableCollection)
+		ifTrue: [ self assert: aCanvas shapeCollection asArray equals: aCanvas privateShapes asArray ]
+		ifFalse: [
+			aCanvas privateShapes do: [ :each |
+				self assert: ((aCanvas shapeCollection entriesAtRectangle: each encompassingRectangle) includes: each) ] ]
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> graphCanvases [
+	"two canvases, useList and useRTree, with 40 overlapping boxes, lines between them and 3 fixed boxes"
+	^ self canvasesWith: [ :canvas | | random boxes |
+		random := Random seed: 7.
+		boxes := (1 to: 40) collect: [ :i |
+			RSBox new size: 20; model: i; position: (random next * 100) @ (random next * 100); yourself ].
+		canvas addAll: boxes.
+		1 to: 39 by: 3 do: [ :i |
+			canvas add: (RSLine new from: (boxes at: i); to: (boxes at: i + 1); model: i negated; yourself) ].
+		1 to: 3 do: [ :i | canvas add: (RSBox new size: 5; model: i + 100; isFixed: true; yourself) ] ]
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> shapeWithModel: anObject in: aCanvas [
+	^ (aCanvas privateShapes, aCanvas fixedShapes) detect: [ :each | each model = anObject ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testContainerOperationsKeepTheEntryIndexDense [
+	"removeShape:, remove, pushFront:, pushBack:, addShape:before: and removeShapes: find the shape
+	by its entryIndex and renumber only the shapes that moved: the entryIndex must stay the index"
+	| canvases points operations |
+	canvases := self graphCanvases.
+	points := (1 to: 200) collect: [ :i | | r | r := Random seed: i. (r next * 120 - 10) @ (r next * 120 - 10) ].
+	operations := {
+		[ :c | c removeShape: (self shapeWithModel: 5 in: c) ].
+		[ :c | (self shapeWithModel: 7 in: c) remove ].
+		[ :c | c pushFront: (self shapeWithModel: 3 in: c) ].
+		[ :c | c pushBack: (self shapeWithModel: 30 in: c) ].
+		[ :c | (self shapeWithModel: 31 in: c) pushBack ].
+		[ :c | (self shapeWithModel: 1 in: c) pushFront ].
+		[ :c | c addShape: (self shapeWithModel: 12 in: c) before: (self shapeWithModel: 2 in: c) ].
+		[ :c | c addShape: (self shapeWithModel: 2 in: c) before: (self shapeWithModel: 35 in: c) ].
+		[ :c | c addShape: (RSBox new size: 30; model: 41; position: 50 @ 50; yourself) before: (self shapeWithModel: 10 in: c) ].
+		[ :c | c pushFront: (self shapeWithModel: 101 in: c) ].
+		[ :c | c pushBack: (self shapeWithModel: 103 in: c) ].
+		[ :c | c removeShape: (self shapeWithModel: 102 in: c) ].
+		[ :c | c removeShapes: ((20 to: 25) collect: [ :m | self shapeWithModel: m in: c ]) ].
+		[ :c | c removeShapes: { self shapeWithModel: -28 in: c. self shapeWithModel: 101 in: c } ].
+		[ :c | "an entryIndex that disagrees with the index: the search falls back to a linear scan"
+			(self shapeWithModel: 15 in: c) entryIndex: 1.
+			c removeShape: (self shapeWithModel: 15 in: c) ] }.
+	operations do: [ :operation |
+		canvases do: [ :canvas |
+			operation value: canvas.
+			self assertConsistent: canvas ].
+		self
+			assert: ((canvases first privateShapes, canvases first fixedShapes) collect: [ :each | each model ]) asArray
+			equals: ((canvases second privateShapes, canvases second fixedShapes) collect: [ :each | each model ]) asArray.
+		points do: [ :p |
+			self assert: (self modelsAt: p in: canvases second) equals: (self modelsAt: p in: canvases first) ] ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testRemoveShapesAsRemoveDoes [
+	"removeShapes: removes the shapes as sending remove to each of them does, lines connected to a
+	removed node and events included"
+	#( #useList #useRTree ) do: [ :selector | | batch oneByOne models counts |
+		batch := self graphCanvases first.
+		batch perform: selector.
+		oneByOne := self graphCanvases first.
+		oneByOne perform: selector.
+		models := #( 1 4 9 10 20 -13 -22 102 ).
+		counts := OrderedCollection new.
+		{ batch. oneByOne } do: [ :canvas | | count |
+			count := 0.
+			canvas when: RSShapeRemovedEvent do: [ count := count + 1 ] for: self.
+			canvas == batch
+				ifTrue: [ canvas removeShapes: (models collect: [ :m | self shapeWithModel: m in: canvas ]) ]
+				ifFalse: [ (models collect: [ :m | self shapeWithModel: m in: canvas ]) do: [ :each | each remove ] ].
+			counts add: count.
+			self assertConsistent: canvas ].
+		self assert: counts first equals: counts second.
+		self assert: counts first > models size.
+		#( #privateShapes #fixedShapes #nodes #lines ) do: [ :accessor |
+			self
+				assert: (((batch perform: accessor) collect: [ :each | each model ]) asArray)
+				equals: (((oneByOne perform: accessor) collect: [ :each | each model ]) asArray) ].
+		batch nodes with: oneByOne nodes do: [ :a :b |
+			self assert: a connectedLines size equals: b connectedLines size ].
+		batch clear.
+		self assert: batch privateShapes isEmpty.
+		self assert: (batch nodes collect: [ :each | each model ]) asArray equals: #( 101 103 ).
+		self assert: batch lines isEmpty.
+		self assert: batch shapeCollection isEmpty.
+		self assertConsistent: batch ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testRemoveShapesOfACompositeFromItsOwnChildren [
+	"removeShapes: may iterate over the collection it removes from: a builder updated a composite
+	with 'container shapes do: #remove', which skipped every other child"
+	#( #useList #useRTree ) do: [ :selector | | composite children |
+		composite := RSComposite new.
+		composite perform: selector.
+		children := (1 to: 10) collect: [ :i | RSBox new size: 5; model: i; position: i * 10 @ 0; yourself ].
+		composite addAll: children.
+		composite removeShapes: composite children.
+		self assert: composite children isEmpty.
+		self assert: composite nodes isEmpty.
+		self assert: composite shapeCollection isEmpty.
+		self assert: (children allSatisfy: [ :each | each parent isNil ]) ]
+]

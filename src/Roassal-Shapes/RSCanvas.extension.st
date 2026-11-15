@@ -50,8 +50,8 @@ c
 ```
 	"
 	| g |
-	g := self shapes copy.
-	g do: #remove.
+	g := self shapes.
+	self removeShapes: g.
 	^ RSComposite new
 		shapes: g;
 		yourself

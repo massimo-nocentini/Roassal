@@ -7,7 +7,8 @@ My users area:
 Trait {
 	#name : 'RSTContainer',
 	#instVars : [
-		'shapeCollection'
+		'shapeCollection',
+		'shapesBeingRemoved'
 	],
 	#category : 'Roassal-Core',
 	#package : 'Roassal',
@@ -78,17 +79,40 @@ RSTContainer >> addShape: aShape [
 
 { #category : 'adding' }
 RSTContainer >> addShape: aShape before: otherShape [
-	| col index |
+	| col index otherIndex |
 	aShape addedIn: self.
 	col := aShape isFixed
 		ifTrue: [ self fixedShapes ]
 		ifFalse: [ self privateShapes ].
-	col remove: aShape.
-	col add: aShape before: otherShape.
-	index := col indexOf: aShape.
-	index to: col size do: [ :i | (col at: i) entryIndex: i ].
+	index := self indexOfShape: aShape in: col.
+	col removeAt: index.
+	otherIndex := self indexOfShape: otherShape in: col.
+	otherIndex = 0 ifTrue: [ ^ col errorNotFound: otherShape ].
+	col add: aShape beforeIndex: otherIndex.
+	"only the shapes between the old and the new place of aShape moved"
+	self renumber: col from: (index min: otherIndex) to: (index max: otherIndex).
 	aShape isFixed
 		ifFalse: [ self shapeCollection updateEntry: aShape before: otherShape ]
+]
+
+{ #category : 'private' }
+RSTContainer >> deferRemovalOf: aShape [
+	"During removeShapes:, the removal of aShape from my collections waits for the end of the batch.
+	Answer whether it does"
+	shapesBeingRemoved ifNil: [ ^ false ].
+	shapesBeingRemoved add: aShape.
+	^ true
+]
+
+{ #category : 'private' }
+RSTContainer >> indexOfShape: aShape in: aCollection [
+	"Answer the index of aShape in aCollection, one of my collections of shapes, or 0. The entryIndex
+	of a shape is its index, so the linear search is only a fallback, in case they disagree"
+	| index |
+	index := aShape entryIndex.
+	(index isInteger and: [ index between: 1 and: aCollection size ]) ifTrue: [
+		(aCollection at: index) == aShape ifTrue: [ ^ index ] ].
+	^ aCollection identityIndexOf: aShape
 ]
 
 { #category : 'accessing' }
@@ -321,18 +345,21 @@ RSTContainer >> privateShapes: aCollection [
 ]
 
 { #category : 'shapes - ordering' }
-RSTContainer >> pushBack: arg1 [
+RSTContainer >> pushBack: aShape [
 
-	| tmp1 |
-	tmp1 := arg1 isFixed
+	| collection index |
+	collection := aShape isFixed
 		        ifTrue: [ self fixedShapes ]
 		        ifFalse: [ self privateShapes ].
-	tmp1
-		remove: arg1;
-		addFirst: arg1.
-	arg1 isFixed ifFalse: [ self shapeCollection pushBack: arg1 ].
-	tmp1 doWithIndex: [ :arg2 :arg3 | arg2 entryIndex: arg3 ].
-	arg1 invalidate
+	index := self indexOfShape: aShape in: collection.
+	index = 0 ifTrue: [ ^ collection errorNotFound: aShape ].
+	collection
+		removeAt: index;
+		addFirst: aShape.
+	aShape isFixed ifFalse: [ self shapeCollection pushBack: aShape ].
+	"only the shapes before the old place of aShape moved"
+	self renumber: collection from: 1 to: index.
+	aShape invalidate
 ]
 
 { #category : 'actions' }
@@ -342,37 +369,101 @@ RSTContainer >> pushBackEdges [
 ]
 
 { #category : 'shapes - ordering' }
-RSTContainer >> pushFront: arg1 [
+RSTContainer >> pushFront: aShape [
 
-	| tmp1 tmp2 |
-	tmp1 := arg1 isFixed
+	| collection index |
+	collection := aShape isFixed
 		        ifTrue: [ self fixedShapes ]
 		        ifFalse: [ self privateShapes ].
-	tmp1
-		remove: arg1;
-		addLast: arg1.
-	arg1 isFixed ifFalse: [ self shapeCollection pushFront: arg1 ].
-	tmp2 := tmp1 size.
-	arg1 entryIndex to: tmp2 do: [ :tmp3 |
-	(tmp1 at: tmp3) entryIndex: tmp3 ].
-	arg1
-		entryIndex;
-		invalidate
+	index := self indexOfShape: aShape in: collection.
+	index = 0 ifTrue: [ ^ collection errorNotFound: aShape ].
+	collection
+		removeAt: index;
+		addLast: aShape.
+	aShape isFixed ifFalse: [ self shapeCollection pushFront: aShape ].
+	"only the shapes after the old place of aShape moved"
+	self renumber: collection from: index to: collection size.
+	aShape invalidate
+]
+
+{ #category : 'private' }
+RSTContainer >> removeAll: aSet from: aCollection [
+	"Remove from aCollection, in one pass, the shapes that aSet includes; answer them"
+	| removed |
+	removed := OrderedCollection new.
+	aCollection ifNil: [ ^ removed ].
+	aCollection removeAllSuchThat: [ :each |
+		(aSet includes: each) and: [
+			removed add: each.
+			true ] ].
+	^ removed
+]
+
+{ #category : 'private' }
+RSTContainer >> removeBatchedFixedShapes: aSet [
+	"Only a canvas has fixed shapes"
+]
+
+{ #category : 'private' }
+RSTContainer >> removeBatchedShapes: aSet [
+	"The end of removeShapes:. aSet holds the shapes given to removeShape:, removeNode: and removeEdge:"
+	| shapes removed |
+	shapes := self privateShapes.
+	removed := self removeAll: aSet from: shapes.
+	removed ifNotEmpty: [ self renumber: shapes from: 1 to: shapes size ].
+	self removeBatchedFixedShapes: aSet.
+	self removeAll: aSet from: self privateNodes.
+	self removeAll: aSet from: self privateEdges.
+	removed ifEmpty: [ ^ self ].
+	"RTSequenceableCollection removes an entry with a linear search, and an RTree with more
+	removals than entries left is faster to build again"
+	(self shapeCollection class == RTSequenceableCollection or: [ removed size > shapes size ])
+		ifTrue: [ self shapeCollection: self shapeCollection class new ]
+		ifFalse: [ removed do: [ :each | self shapeCollection remove: each ] ]
 ]
 
 { #category : 'removing' }
 RSTContainer >> removeEdge: anEdge [
+	(self deferRemovalOf: anEdge) ifTrue: [ ^ self ].
 	self edges remove: anEdge ifAbsent: [  ]
 ]
 
 { #category : 'removing' }
 RSTContainer >> removeNode: aNode [
+	(self deferRemovalOf: aNode) ifTrue: [ ^ self ].
 	self nodes remove: aNode ifAbsent: [  ]
 ]
 
 { #category : 'removing' }
 RSTContainer >> removeShape: aShape [
 	^ self explicitRequirement
+]
+
+{ #category : 'removing' }
+RSTContainer >> removeShapes: aCollection [
+	"Remove the shapes of aCollection from their container, as sending #remove to each of them
+	does: the lines connected to a removed node are removed too, and every removed shape announces
+	an RSShapeRemovedEvent. But my collections of shapes, nodes and lines, the entryIndex of my
+	shapes and my shape collection are updated once, at the end. One removeShape: costs O(n): it
+	removes the shape from an OrderedCollection and renumbers the shapes after it. So removing
+	k shapes one by one costs O(k * n), and removeShapes: costs O(n + k).
+	Until the end, the removed shapes, whose parent is already nil, are still in my collections.
+	aCollection may be one of my own collections: it does not change during the iteration"
+
+	shapesBeingRemoved ifNotNil: [ ^ aCollection do: [ :each | each remove ] ].
+	shapesBeingRemoved := IdentitySet new.
+	[ aCollection do: [ :each | each remove ] ] ensure: [
+		| batch |
+		batch := shapesBeingRemoved.
+		shapesBeingRemoved := nil.
+		self removeBatchedShapes: batch ]
+]
+
+{ #category : 'private' }
+RSTContainer >> renumber: aCollection from: start to: stop [
+	"The entryIndex of a shape is its index in my shapes (or my fixed shapes): the RTree orders
+	the shapes it finds by entryIndex"
+	start to: stop do: [ :i | (aCollection at: i) entryIndex: i ]
 ]
 
 { #category : 'accessing' }

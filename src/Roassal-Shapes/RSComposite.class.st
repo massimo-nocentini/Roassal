@@ -431,13 +431,17 @@ RSComposite >> privateShapes: aCollection [
 
 { #category : 'removing' }
 RSComposite >> removeShape: shape [
-	| evt |
+	| evt index deferred |
 	shape invalidate.
-	children remove: shape.
-	shape entryIndex to: children size do: [ :i | (children at: i) entryIndex: i ].
+	deferred := self deferRemovalOf: shape.
+	deferred ifFalse: [
+		index := self indexOfShape: shape in: children.
+		index = 0 ifTrue: [ ^ children errorNotFound: shape ].
+		children removeAt: index.
+		self renumber: children from: index to: children size ].
 	shape parent: nil.
 	evt := RSShapeRemovedEvent new shape: shape.
-	self shapeCollection remove: shape.
+	deferred ifFalse: [ self shapeCollection remove: shape ].
 	self announce: evt.
 	shape announce: evt
 ]

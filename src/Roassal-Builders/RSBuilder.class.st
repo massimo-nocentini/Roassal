@@ -123,6 +123,6 @@ RSBuilder >> shapes [
 
 { #category : 'updating' }
 RSBuilder >> update [
-	self container shapes do: #remove.
+	self container removeShapes: self container shapes.
 	self build
 ]
