@@ -316,17 +316,24 @@ RSBoundingShape >> isNode [
 
 { #category : 'matrix' }
 RSBoundingShape >> loadIdentity [
-	matrix loadIdentity
+	matrix loadIdentity.
+	self resetBBox
 ]
 
 { #category : 'matrix' }
 RSBoundingShape >> matrix [
+	"The transformation of the shape. The canvas does not see a change made directly to this
+	matrix: the encompassing rectangle stays cached, and the shape collection keeps the shape
+	where it was, so it is drawn and found at the wrong place. Change it with matrixDo:,
+	matrix:, loadIdentity, scaleBy:, rotateByDegrees: or translateTo:, or send resetBBox after
+	the change"
 	^ matrix
 ]
 
 { #category : 'matrix' }
 RSBoundingShape >> matrix: aMatrix [
-	matrix := aMatrix
+	matrix := aMatrix.
+	self resetBBox
 ]
 
 { #category : 'matrix' }

@@ -197,3 +197,27 @@ RSRTreeRegressionTest >> testNonFiniteLinePointsAreRejected [
 			canvas shapes do: [ :line | line translateBy: 0 @ 5 ].
 			self assert: (self modelsAt: 50 @ 25 in: canvas) equals: #( #polyline ) ]
 ]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testMatrixChangesResetTheBoundingBox [
+	"matrix: and loadIdentity did not reset the bounding box: the cached rectangle and the shape
+	collection kept the old place of the shape"
+	(self canvasesWith: [ :canvas |
+		canvas add: (RSBox new extent: 100 @ 10; model: #box; yourself) ]) do: [ :canvas | | box |
+			box := canvas shapes first.
+			box matrix: (box matrix copy rotateByDegrees: 90; yourself).
+			self assert: box encompassingRectangle equals: box computeEncompassingRectangle.
+			self assert: (self modelsAt: 0 @ 40 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 40 @ 0 in: canvas) isEmpty.
+			box loadIdentity.
+			self assert: box encompassingRectangle equals: box computeEncompassingRectangle.
+			self assert: (self modelsAt: 40 @ 0 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 0 @ 40 in: canvas) isEmpty.
+			box matrix: (AthensAffineTransform new translation: 300 @ 300; yourself).
+			self assert: (self modelsAt: 340 @ 300 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 40 @ 0 in: canvas) isEmpty.
+			box translateBy: 10 @ 0.
+			self assert: (self modelsAt: 355 @ 300 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 305 @ 300 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 255 @ 300 in: canvas) isEmpty ]
+]

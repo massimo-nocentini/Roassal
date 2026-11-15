@@ -51,10 +51,11 @@ RSAnimatedPopup >> translatePopup: popup event: evt [
 		from: 0.05; to: 1;
 		easing: RSEasingInterpolator backOut;
 		onStepDo: [ :t |
-			popup matrix
-				loadIdentity;
-				translation: (pscale scale: t);
-				scaleBy: (1@t) * scale.
+			popup matrixDo: [ :matrix |
+				matrix
+					loadIdentity;
+					translation: (pscale scale: t);
+					scaleBy: (1@t) * scale ].
 			popup signalUpdate.
 			]
 ]
