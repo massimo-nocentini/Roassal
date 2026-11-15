@@ -183,7 +183,7 @@ BaselineOfRoassal >> numeric: spec [
 BaselineOfRoassal >> rtree: spec [
 	spec
 		baseline: 'RTree'
-		with: [ spec repository: 'github://pharo-graphics/RTree:v1.01/src' ]
+		with: [ spec repository: 'github://pharo-graphics/RTree:master/src' ]
 ]
 
 { #category : 'dependencies' }
