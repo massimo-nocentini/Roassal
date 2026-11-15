@@ -79,3 +79,18 @@ RSRTreeRegressionTest >> testMarkerAddedAfterTheLineIsInTheTree [
 	self assert: ((canvas shapeCollection entriesAtPoint: 205 @ -8) includes: line).
 	self assert: ((canvas shapeCollection entriesAtRectangle: (204 @ -9 corner: 206 @ -7)) includes: line)
 ]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testBitmapFormUpdatesTheShapeCollection [
+	"RSBitmap>>form: cleared the cached rectangle without telling the shape collection;
+	the new area was not hit and the next move signalled NotFound"
+	(self canvasesWith: [ :canvas | | bitmap |
+		bitmap := RSBitmap new form: (Form extent: 10 @ 10 depth: 32); model: #bitmap; yourself.
+		canvas add: bitmap.
+		bitmap form: (Form extent: 200 @ 200 depth: 32) ]) do: [ :canvas | | bitmap |
+			bitmap := canvas shapes first.
+			self assert: (self modelsAt: 90 @ 0 in: canvas) equals: #( #bitmap ).
+			bitmap translateTo: 50 @ 50.
+			self assert: (self modelsAt: 140 @ 140 in: canvas) equals: #( #bitmap ).
+			self assert: (self modelsAt: -60 @ -60 in: canvas) isEmpty ]
+]

@@ -27,7 +27,8 @@ RSBitmap >> computeRectangle [
 	baseRectangle := Rectangle floatCenter: 0@0 extent: (form
 		ifNil: [ 0@0 ]
 		ifNotNil: [ form extent ]).
-	encompassingRectangle := nil
+	"resetBBox tells the shape collection while the old rectangle is still cached"
+	self resetBBox
 ]
 
 { #category : 'accessing' }
