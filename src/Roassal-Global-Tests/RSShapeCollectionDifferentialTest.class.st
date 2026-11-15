@@ -1,5 +1,5 @@
 "
-I build the same scene (boxes, labels, lines with markers, nested composites) in three canvases: one uses an `RTSequenceableCollection` (useList), one an `RTreeCollection` (useRTree), and one is bulk loaded into an `RTBulkLoadRTreeCollection` once the scene is built. Then I apply the same random operations to the three canvases: moves, extent and text changes, rotations, removals one by one and in batch, additions, z-order changes, layouts and moves inside composites. After every few operations, the RTree canvases must answer what the list answers: the shapes at many points (in the same order), the shape with an action, and the shapes in rectangles. Since both collections test the cached rectangle of a shape first, every shape must also have an up-to-date rectangle, and an entryIndex equal to its index.
+I build the same scene (boxes, labels, lines with markers, nested composites) in three canvases: one uses an `RTSequenceableCollection` (useList), one an `RTreeCollection` (useRTree), and one is bulk loaded into an `RTreeCollection` once the scene is built (`RTreeCollection>>bulkLoad:`). Then I apply the same random operations to the three canvases: moves, extent and text changes, rotations, removals one by one and in batch, additions, z-order changes, layouts and moves inside composites. After every few operations, the RTree canvases must answer what the list answers: the shapes at many points (in the same order), the shape with an action, and the shapes in rectangles. Since both collections test the cached rectangle of a shape first, every shape must also have an up-to-date rectangle, and an entryIndex equal to its index.
 
 The seeds are fixed, so a failure can be replayed.
 "
@@ -113,8 +113,8 @@ RSShapeCollectionDifferentialTest >> buildSceneWithSeed: anInteger [
 			composite adjustToChildren.
 			composite position: (r next * 400) @ (r next * 400).
 			kind = #bulk ifTrue: [
-				composite children do: [ :each | each shapeCollection: RTBulkLoadRTreeCollection new ].
-				composite shapeCollection: RTBulkLoadRTreeCollection new ].
+				composite children do: [ :each | each shapeCollection: RTreeCollection new ].
+				composite shapeCollection: RTreeCollection new ].
 			self addInteractionTo: composite with: r.
 			canvas add: composite ].
 		1 to: 30 do: [ :i | | line |
@@ -132,7 +132,7 @@ RSShapeCollectionDifferentialTest >> buildSceneWithSeed: anInteger [
 			controlPoints: { 10 @ 10. 200 @ 50. 380 @ 10 };
 			model: self newModel;
 			yourself).
-		kind = #bulk ifTrue: [ canvas shapeCollection: RTBulkLoadRTreeCollection new ].
+		kind = #bulk ifTrue: [ canvas shapeCollection: RTreeCollection new ].
 		canvas ].
 	shapesByModel := canvases collect: [ :canvas | | map |
 		map := Dictionary new.

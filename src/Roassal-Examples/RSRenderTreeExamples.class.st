@@ -52,7 +52,9 @@ RSRenderTreeExamples >> example02BigVisualizationHalfMillion [
 		b2 @ RSDraggable.
 		c add: b2.
 	].
-	c shapeCollection: RTBulkLoadRTreeCollection new.
+	"the RTree is built at once from the shapes of the canvas (RTreeCollection>>bulkLoad:),
+	much faster than adding them one by one to an RTree"
+	c useRTree.
 
 	c @ RSCanvasController simple.
 	c nodes @ RSPopup.

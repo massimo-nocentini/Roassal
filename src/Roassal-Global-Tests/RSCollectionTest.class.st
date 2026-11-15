@@ -15,7 +15,7 @@ Class {
 RSCollectionTest class >> testParameters [
 	| m classesToConsider |
 	m := ParametrizedTestMatrix new.
-	"allSubclasses: RTBulkLoadRTreeCollection is a subclass of RTreeCollection"
+	"every concrete collection of RTree, whatever its superclass"
 	classesToConsider := RTAbstractCollection allSubclasses reject: [ :each | each isAbstract ].
 	classesToConsider do: [ :cls |
 		m addCase: { (#shapeCollectionClass: -> cls) }

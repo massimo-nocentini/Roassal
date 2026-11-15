@@ -127,14 +127,16 @@ RSRTreeRegressionTest >> modelsAt: aPoint in: aCanvas [
 
 { #category : 'tests' }
 RSRTreeRegressionTest >> testBulkLoadedCanvasAcceptsChanges [
-	"RTBulkLoadRTreeCollection left every height nil: the first drag, add or remove failed"
+	"an RTreeCollection given to a canvas that has shapes builds the tree at once (bulkLoad:):
+	it must accept moves, additions and removals afterwards. RTBulkLoadRTreeCollection, which it
+	replaces, left every height nil: the first drag, add or remove failed"
 	| canvas shapes random box |
 	canvas := RSCanvas new.
 	random := Random seed: 1.
 	shapes := (1 to: 100) collect: [ :i |
 		RSBox new size: 10; model: i; position: (random next * 500) @ (random next * 500); yourself ].
 	canvas addAll: shapes.
-	canvas shapeCollection: RTBulkLoadRTreeCollection new.
+	canvas shapeCollection: RTreeCollection new.
 	self assert: canvas shapeCollection height notNil.
 	self assert: canvas shapeCollection isTotalBalanced.
 	(shapes first: 30) do: [ :each | each translateBy: 3 @ 3 ].
