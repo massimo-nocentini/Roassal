@@ -15,7 +15,8 @@ Class {
 RSCollectionTest class >> testParameters [
 	| m classesToConsider |
 	m := ParametrizedTestMatrix new.
-	classesToConsider := RTAbstractCollection subclasses.
+	"allSubclasses: RTBulkLoadRTreeCollection is a subclass of RTreeCollection"
+	classesToConsider := RTAbstractCollection allSubclasses reject: [ :each | each isAbstract ].
 	classesToConsider do: [ :cls |
 		m addCase: { (#shapeCollectionClass: -> cls) }
 	].
@@ -81,6 +82,45 @@ RSCollectionTest >> testAdd [
 	self assert: canvas lines size equals: 1.
 	self assert: canvas fixedShapes size equals: 1.
 	self assert: shapeCollection size equals: 3
+]
+
+{ #category : 'tests' }
+RSCollectionTest >> testBulkLoadOfShapesThenUpdates [
+	"setUp gives the collection to an empty canvas. Here it bulk loads the shapes of a canvas, then
+	the shapes move, change size, leave, arrive and change order: the collection must answer what a
+	list of the same shapes answers"
+	| random boxes reference |
+	random := Random seed: 11.
+	canvas := RSCanvas new.
+	boxes := (1 to: 300) collect: [ :i |
+		RSBox new
+			size: random next * 20 + 5;
+			model: i;
+			position: (random next * 400) @ (random next * 400);
+			yourself ].
+	canvas addAll: boxes.
+	shapeCollection := self shapeCollectionClass new.
+	canvas shapeCollection: shapeCollection.
+	self assert: shapeCollection size equals: 300.
+	(boxes first: 100) do: [ :each | each translateBy: (random next * 40 - 20) @ (random next * 40 - 20) ].
+	(boxes copyFrom: 101 to: 150) do: [ :each | each extent: (random next * 30 + 1) @ (random next * 30 + 1) ].
+	(boxes copyFrom: 151 to: 200) do: [ :each | each remove ].
+	1 to: 50 do: [ :i |
+		canvas add: (RSBox new size: 10; model: 300 + i; position: (random next * 400) @ (random next * 400); yourself) ].
+	(1 to: 300 by: 7) do: [ :i | (boxes at: i) isInACanvas ifTrue: [ (boxes at: i) pushFront ] ].
+	self assert: shapeCollection size equals: 300.
+	reference := RTSequenceableCollection new.
+	reference addAll: canvas privateShapes.
+	1 to: 500 do: [ :i | | point |
+		point := (random next * 440 - 20) @ (random next * 440 - 20).
+		self
+			assert: ((shapeCollection entriesAtPoint: point) collect: [ :each | each model ]) asArray
+			equals: ((reference entriesAtPoint: point) collect: [ :each | each model ]) asArray ].
+	1 to: 50 do: [ :i | | rectangle |
+		rectangle := (random next * 400) @ (random next * 400) extent: (random next * 80) @ (random next * 80).
+		self
+			assert: ((shapeCollection entriesAtRectangle: rectangle) collect: [ :each | each model ]) asSet
+			equals: ((reference entriesAtRectangle: rectangle) collect: [ :each | each model ]) asSet ]
 ]
 
 { #category : 'tests' }
