@@ -94,3 +94,13 @@ RSRTreeRegressionTest >> testBitmapFormUpdatesTheShapeCollection [
 			self assert: (self modelsAt: 140 @ 140 in: canvas) equals: #( #bitmap ).
 			self assert: (self modelsAt: -60 @ -60 in: canvas) isEmpty ]
 ]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testRotateByRadiansResetsTheBoundingBox [
+	"rotateByRadians: did not reset the bounding box, unlike rotateByDegrees:"
+	(self canvasesWith: [ :canvas |
+		canvas add: (RSBox new extent: 100 @ 10; model: #box; yourself).
+		canvas shapes first rotateByRadians: Float pi / 2 ]) do: [ :canvas |
+			self assert: (self modelsAt: 0 @ 40 in: canvas) equals: #( #box ).
+			self assert: (self modelsAt: 40 @ 0 in: canvas) isEmpty ]
+]

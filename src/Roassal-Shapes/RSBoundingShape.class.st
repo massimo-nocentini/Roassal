@@ -496,7 +496,8 @@ c add: (RSBox new
 c
 -=-=-=
 	"
-	matrix rotateByRadians: angle
+	matrix rotateByRadians: angle.
+	self resetBBox
 ]
 
 { #category : 'matrix' }
