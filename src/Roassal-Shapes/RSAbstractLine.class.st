@@ -279,6 +279,19 @@ RSAbstractLine >> from: aShapeOrAPoint [
 	from := self setAnchor: from shape: aShapeOrAPoint
 ]
 
+{ #category : 'finding/searching' }
+RSAbstractLine >> firstEntryAtPoint: position satisfying: aBlock ifNone: noneBlock [
+	"As in RSShape, with aBlock tested between my rectangle, which is cheap, and the distance to
+	the line, which is not: in a graph most lines have no callback, and the block rejects them
+	before the distance is computed. includesPoint: rejects a point outside my rectangle anyway"
+	| rectangle |
+	rectangle := self encompassingRectangle.
+	^ ((rectangle origin <= position and: [ position <= rectangle corner ])
+		and: [ (aBlock value: self) and: [ self includesPoint: position ] ])
+			ifTrue: [ self ]
+			ifFalse: [ noneBlock value ]
+]
+
 { #category : 'accessing' }
 RSAbstractLine >> includedRadius [
 	^ self border width / 2
