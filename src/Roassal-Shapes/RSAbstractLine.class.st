@@ -286,7 +286,14 @@ RSAbstractLine >> includedRadius [
 
 { #category : 'testing' }
 RSAbstractLine >> includesPoint: aPoint [
-	^ self hasBorder and: [ (self basicIncludesPoint: aPoint) or: [ self markersIncludesPoint: aPoint ] ]
+	"The shape collections find the candidates with encompassingRectangle, so a point outside it
+	must not be accepted, or useRTree and useList would disagree. onLineFrom:to:within: accepts
+	a disk around the end points, larger than the rectangle of a line without caps"
+	| rectangle |
+	self hasBorder ifFalse: [ ^ false ].
+	rectangle := self encompassingRectangle.
+	(rectangle origin <= aPoint and: [ aPoint <= rectangle corner ]) ifFalse: [ ^ false ].
+	^ (self basicIncludesPoint: aPoint) or: [ self markersIncludesPoint: aPoint ]
 ]
 
 { #category : 'initialization' }

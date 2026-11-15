@@ -127,5 +127,7 @@ RSTMarkeable >> setMarker: index with: marker [
 	m := marker.
 	marker ifNotNil: [ m := marker asMarker ].
 	self markers at: index put: m.
+	"a marker enlarges the encompassing rectangle"
+	self resetBBox.
 	^ m
 ]

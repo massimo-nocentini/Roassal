@@ -47,3 +47,35 @@ RSRTreeRegressionTest >> testBulkLoadedCanvasAcceptsChanges [
 	(shapes first: 30) do: [ :each |
 		self assert: ((canvas shapeCollection entriesAtPoint: each position) includes: each) ]
 ]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testLineHitsAgree [
+	"the list found a line at points around its end points that are outside its rectangle, where the
+	tree, which prunes with the rectangle, did not. The points on the far border of a rectangle
+	(x = corner x or y = corner y) are left out: RTree v1.01 tests them with the half-open
+	Rectangle>>containsPoint:, so only the list finds a line there"
+	| canvases |
+	canvases := self canvasesWith: [ :canvas | | a b line |
+		a := RSBox new size: 20; model: #a; yourself.
+		b := RSBox new size: 20; model: #b; position: 0 @ 100; yourself.
+		line := RSLine new from: a; to: b; model: #line; yourself.
+		canvas add: a; add: b; add: line.
+		canvas add: (RSLine new startPoint: 0 @ 0; endPoint: 100 @ 0; width: 1; model: #h; yourself) ].
+	{ 0 @ 0. 50 @ 0.2. 100.3 @ 0.1. -0.3 @ 0.1. 0.3 @ 50. 0.2 @ -0.3. 0 @ 100.3 } do: [ :p |
+		self assert: (self modelsAt: p in: canvases second) equals: (self modelsAt: p in: canvases first) ].
+	self assert: (self modelsAt: 0 @ 100.3 in: canvases first) equals: #( #b ).
+	self assert: (self modelsAt: 0.3 @ 50 in: canvases first) equals: #( #line )
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testMarkerAddedAfterTheLineIsInTheTree [
+	"a marker enlarges the rectangle of a line: setting it must update the shape collection"
+	| canvas line |
+	canvas := RSCanvas new.
+	canvas useRTree.
+	line := RSLine new startPoint: 0 @ 0; endPoint: 200 @ 0; yourself.
+	canvas add: line.
+	line markerEnd: (RSBox new size: 20; yourself) asMarker.
+	self assert: ((canvas shapeCollection entriesAtPoint: 205 @ -8) includes: line).
+	self assert: ((canvas shapeCollection entriesAtRectangle: (204 @ -9 corner: 206 @ -7)) includes: line)
+]
