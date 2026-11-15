@@ -119,7 +119,8 @@ RSTContainer >> indexOfShape: aShape in: aCollection [
 RSTContainer >> allChildren [
 	| allChildren index |
 	index := 1.
-	allChildren := RSGroup withAll: self shapes.
+	"privateShapes: RSCanvas>>shapes answers a copy, and RSGroup withAll: copies again"
+	allChildren := RSGroup withAll: (self privateShapes ifNil: [ #(  ) ]).
 	[ index <= allChildren size ] whileTrue: [
 		allChildren addAll: ((allChildren at: index) children ifNil: [#()]).
 		index := index + 1 ].

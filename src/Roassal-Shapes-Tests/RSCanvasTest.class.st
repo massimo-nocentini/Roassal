@@ -517,3 +517,32 @@ RSCanvasTest >> testVisibleArea [
 	self assert: canvas position equals: bigSize asPoint / -2.
 	self assert: canvas camera scale equals: bigSize / smallSize
 ]
+
+{ #category : 'tests' }
+RSCanvasTest >> testAllChildren [
+	| box composite inner label |
+	box := RSBox new.
+	label := RSLabel new text: 'a'.
+	inner := RSComposite new.
+	inner add: label.
+	composite := RSComposite new.
+	composite add: inner.
+	canvas add: box; add: composite.
+	self assert: canvas allChildren asArray equals: { box. composite. inner. label }.
+	self assert: canvas allChildren class equals: RSGroup.
+	canvas allChildren removeAll.
+	self assert: canvas numberOfShapes equals: 2
+]
+
+{ #category : 'tests' }
+RSCanvasTest >> testShapesAnswersACopy [
+	| box shapes |
+	box := RSBox new.
+	canvas add: box.
+	shapes := canvas shapes.
+	self assert: shapes asArray equals: { box }.
+	self deny: shapes identicalTo: canvas shapes.
+	shapes removeAll.
+	self assert: canvas numberOfShapes equals: 1.
+	self assert: canvas privateShapes asArray equals: { box }
+]

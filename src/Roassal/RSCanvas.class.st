@@ -642,6 +642,12 @@ c := RSCanvas new.
 c add: s1; add: s2.
 ```
 The expression `c shapes` returns a `RSGroup` containing both `s1` and `s2`
+
+The answer is a copy, made at every call: adding to it or removing from it does not change the canvas,
+and iterating it while shapes are added or removed is safe. The copy costs O(n), so keep the answer
+instead of sending `shapes` in a loop (`c shapes at: i` copies all the shapes for each `i`). Use
+`numberOfShapes` for the size; Roassal itself uses `privateShapes`, which answers the collection
+of the canvas.
 "
 	^ shapes copy
 ]
