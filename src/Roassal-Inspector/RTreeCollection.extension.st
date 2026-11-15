@@ -4,7 +4,7 @@ Extension { #name : 'RTreeCollection' }
 RTreeCollection >> inspectorQueries: aBuilder [
 	<inspectorPresentationOrder: 4 title: 'Queries'>
 
-	^ root inspectorQueries: aBuilder
+	^ self root inspectorQueries: aBuilder
 ]
 
 { #category : '*Roassal-Inspector' }
@@ -28,7 +28,7 @@ RTreeCollection >> inspectorRectanglesContext: aContext [
 RTreeCollection >> inspectorTree: aBuilder [
 	<inspectorPresentationOrder: 3 title: 'Tree'>
 
-	^ root inspectorTree: aBuilder
+	^ self root inspectorTree: aBuilder
 ]
 
 { #category : '*Roassal-Inspector' }
@@ -40,7 +40,7 @@ RTreeCollection >> inspectorTreeContext: aContext [
 RTreeCollection >> inspectorWithParent: aBuilder [
 	<inspectorPresentationOrder: 2 title: 'With Parent'>
 
-	^ root inspectorWithParent: aBuilder
+	^ self root inspectorWithParent: aBuilder
 ]
 
 { #category : '*Roassal-Inspector' }
