@@ -46,6 +46,12 @@ RSShapeCollectionDifferentialTest >> assertCanvasesAgree [
 	rectangles := (1 to: 25) collect: [ :i | | origin |
 		origin := bounds origin + ((random next * bounds width) @ (random next * bounds height)).
 		origin extent: (random next * bounds width / 4) @ (random next * bounds height / 4) ].
+	canvases do: [ :canvas |
+		"the topmost shape with an action is the first of the shapes with an action"
+		points do: [ :p |
+			self
+				assert: (canvas shapeWithActionForPosition: p)
+				identicalTo: ((canvas shapesWithActionForPosition: p) ifEmpty: [ nil ] ifNotEmpty: [ :shapes | shapes first ]) ] ].
 	canvases allButFirst do: [ :canvas |
 		points do: [ :p |
 			self assert: (self modelsAt: p in: canvas) equals: (self modelsAt: p in: reference).

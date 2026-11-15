@@ -406,6 +406,15 @@ RSShape >> fill: aColor [
 	self color: (aColor isNumber ifTrue: [ Color r: aColor g: aColor b: aColor range: 255 ])
 ]
 
+{ #category : 'finding/searching' }
+RSShape >> firstEntryAtPoint: position satisfying: aBlock ifNone: noneBlock [
+	"The shape collections ask it for a hit test: myself if addEntriesIn:position: adds me and I
+	satisfy aBlock. The default of RTEntry collects the hits in a new collection first"
+	^ ((self includesPoint: position) and: [ aBlock value: self ])
+		ifTrue: [ self ]
+		ifFalse: [ noneBlock value ]
+]
+
 { #category : 'accessing - computed' }
 RSShape >> globalEncompassingRectangle [
 	^ self encompassingRectangle

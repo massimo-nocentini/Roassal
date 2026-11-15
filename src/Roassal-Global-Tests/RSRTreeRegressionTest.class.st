@@ -21,6 +21,80 @@ RSRTreeRegressionTest >> canvasesWith: aBlock [
 ]
 
 { #category : 'helpers' }
+RSRTreeRegressionTest >> collectionClasses [
+	"every shape collection: the list, the default, comes first"
+	^ { RTSequenceableCollection. RTreeCollection. RTNaryTreeCollection. RTPackedTreeCollection. RTGridCollection. RTLooseQuadtreeCollection }
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> hitTestCanvasWith: aCollectionClass [
+	"boxes, nested composites, long lines and lines with markers, and fixed shapes, about half of
+	them with an event callback; the containers all use aCollectionClass"
+	| canvas random withAction boxes |
+	canvas := RSCanvas new.
+	canvas shapeCollection: aCollectionClass new.
+	random := Random seed: 11.
+	withAction := [ :shape |
+		random next < 0.5 ifTrue: [ shape when: RSMouseClick do: [  ] for: self ].
+		shape ].
+	boxes := (1 to: 50) collect: [ :i |
+		withAction value: (RSBox new
+			size: random next * 30 + 5;
+			model: i;
+			position: (random next * 300) @ (random next * 300);
+			yourself) ].
+	canvas addAll: boxes.
+	1 to: 12 do: [ :i | | composite |
+		composite := RSComposite new model: 100 + i; yourself.
+		composite shapeCollection: aCollectionClass new.
+		1 to: 3 do: [ :j | | inner |
+			inner := RSComposite new model: 1000 + (i * 10) + j; yourself.
+			inner shapeCollection: aCollectionClass new.
+			inner add: (withAction value: (RSBox new size: 15; model: 10000 + (i * 10) + j; yourself)).
+			inner add: (withAction value: (RSEllipse new size: 9; model: 20000 + (i * 10) + j; position: 4 @ 4; yourself)).
+			inner adjustToChildren.
+			inner position: (random next * 40) @ (random next * 40).
+			composite add: (withAction value: inner) ].
+		composite adjustToChildren.
+		composite position: (random next * 300) @ (random next * 300).
+		canvas add: (withAction value: composite) ].
+	1 to: 60 do: [ :i | | line |
+		line := RSLine new
+			from: (boxes at: (random nextInteger: boxes size));
+			to: (boxes at: (random nextInteger: boxes size));
+			width: random next * 4 + 1;
+			model: i negated;
+			yourself.
+		random next < 0.2 ifTrue: [ line markerEnd: (RSBox new size: 8; yourself) asMarker ].
+		canvas add: (withAction value: line) ].
+	1 to: 3 do: [ :i |
+		canvas add: (withAction value: (RSBox new size: 30; model: 200 + i; position: (i * 40) @ 20; isFixed: true; yourself)) ].
+	^ canvas
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> hitTestPointsIn: aCanvas [
+	"random points, the end points and middle of the lines, and the centre of the shapes"
+	| random bounds points |
+	random := Random seed: 12.
+	bounds := aCanvas encompassingRectangle expandBy: 20.
+	points := ((1 to: 400) collect: [ :i |
+		bounds origin + ((random next * bounds width) @ (random next * bounds height)) ]) asOrderedCollection.
+	aCanvas lines do: [ :line |
+		points add: line startPoint; add: line endPoint; add: line startPoint + line endPoint / 2 ].
+	aCanvas allChildren do: [ :each | points add: each globalEncompassingRectangle center ].
+	^ points
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> modelOf: aShapeOrCanvas in: aCanvas [
+	"shapeWithActionForPositionInPixels: answers the canvas when no shape has an action there"
+	^ aShapeOrCanvas == aCanvas
+		ifTrue: [ #canvas ]
+		ifFalse: [ aShapeOrCanvas model ]
+]
+
+{ #category : 'helpers' }
 RSRTreeRegressionTest >> modelsAt: aPoint in: aCanvas [
 	^ ((aCanvas shapeCollection entriesAtPoint: aPoint) collect: [ :each | each model ]) asArray
 ]
@@ -93,6 +167,32 @@ RSRTreeRegressionTest >> testBitmapFormUpdatesTheShapeCollection [
 			bitmap translateTo: 50 @ 50.
 			self assert: (self modelsAt: 140 @ 140 in: canvas) equals: #( #bitmap ).
 			self assert: (self modelsAt: -60 @ -60 in: canvas) isEmpty ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testShapeWithActionIsTheFirstShapeWithAction [
+	"shapeWithActionForPosition: asks the shape collection for the topmost shape with an event
+	callback (entryAtPoint:satisfying:ifNone:, and RSComposite>>firstEntryAtPoint:satisfying:ifNone:
+	inside composites), instead of ordering every hit. It must answer the first of
+	shapesWithActionForPosition:, as before, with every shape collection; the hit in pixels, fixed
+	shapes first, must be the same for every collection"
+	| reference points expected |
+	reference := self hitTestCanvasWith: RTSequenceableCollection.
+	points := self hitTestPointsIn: reference.
+	expected := points collect: [ :p |
+		self modelOf: (reference shapeWithActionForPositionInPixels: (reference camera fromSpaceToPixel: p)) in: reference ].
+	self assert: (expected asSet size) > 20.
+	self collectionClasses do: [ :collectionClass | | canvas |
+		canvas := self hitTestCanvasWith: collectionClass.
+		points with: expected do: [ :p :model | | first |
+			first := (canvas shapesWithActionForPosition: p)
+				ifEmpty: [ nil ]
+				ifNotEmpty: [ :shapes | shapes first ].
+			self assert: (canvas shapeWithActionForPosition: p) identicalTo: first.
+			self assert: (first ifNotNil: [ first model ]) equals: ((reference shapeWithActionForPosition: p) ifNotNil: [ :shape | shape model ]).
+			self
+				assert: (self modelOf: (canvas shapeWithActionForPositionInPixels: (canvas camera fromSpaceToPixel: p)) in: canvas)
+				equals: model ] ]
 ]
 
 { #category : 'tests' }

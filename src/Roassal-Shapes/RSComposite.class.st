@@ -331,6 +331,21 @@ RSComposite >> deepShapesFromModels: someObjects result: result [
 	self nodes do: [ :c | c deepShapesFromModels: someObjects result: result ]
 ]
 
+{ #category : 'finding/searching' }
+RSComposite >> firstEntryAtPoint: position satisfying: aBlock ifNone: noneBlock [
+	"The first of the shapes that addEntriesIn:position: adds that satisfies aBlock: the topmost
+	of my children at position, then myself. My shape collection finds it without ordering
+	every child there"
+	(self includesPoint: position) ifFalse: [ ^ noneBlock value ].
+	^ self shapeCollection
+		entryAtPoint: (self matrix rsInverseTransform: position)
+		satisfying: aBlock
+		ifNone: [
+			(aBlock value: self)
+				ifTrue: [ self ]
+				ifFalse: [ noneBlock value ] ]
+]
+
 { #category : 'accessing' }
 RSComposite >> fixedShapes [
 	"composite does not contains fixed shapes"

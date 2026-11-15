@@ -611,11 +611,13 @@ RSCanvas >> shapeWithAction: eventClass forPositionInPixels: position [
 
 { #category : 'event processing' }
 RSCanvas >> shapeWithActionForPosition: aPositionInSpace [
+	"The topmost shape at aPositionInSpace that has an event callback, or nil: the first of
+	shapesWithActionForPosition:, found without computing and ordering every shape there"
 
-	| result |
-	result := self shapesWithActionForPosition: aPositionInSpace.
-	result ifEmpty: [ ^ nil ].
-	^ result first
+	^ self shapeCollection
+		entryAtPoint: aPositionInSpace
+		satisfying: [ :shape | shape hasEventCallback ]
+		ifNone: [ nil ]
 ]
 
 { #category : 'event processing' }
