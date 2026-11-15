@@ -104,3 +104,45 @@ RSRTreeRegressionTest >> testRotateByRadiansResetsTheBoundingBox [
 			self assert: (self modelsAt: 0 @ 40 in: canvas) equals: #( #box ).
 			self assert: (self modelsAt: 40 @ 0 in: canvas) isEmpty ]
 ]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testHitOrderWithNestedComposites [
+	"the tree orders the shapes that hit by entryIndex and keeps the order of the hits of a
+	composite (its children first): the same order as useList"
+	| canvases random points |
+	random := Random seed: 3.
+	points := (1 to: 300) collect: [ :i | (random next * 300) @ (random next * 300) ].
+	canvases := self canvasesWith: [ :canvas | | r |
+		r := Random seed: 2.
+		1 to: 40 do: [ :i | | composite |
+			composite := RSComposite new model: i; yourself.
+			(canvas shapeCollection isKindOf: RTreeCollection) ifTrue: [ composite useRTree ].
+			1 to: 4 do: [ :j | | inner |
+				inner := RSComposite new model: i * 100 + j; yourself.
+				inner add: (RSBox new size: 20; model: i * 10000 + j; yourself).
+				inner add: (RSEllipse new size: 12; model: i * 10000 + j + 50; position: 3 @ 3; yourself).
+				inner adjustToChildren.
+				inner position: (r next * 40) @ (r next * 40).
+				composite add: inner ].
+			composite adjustToChildren.
+			composite position: (r next * 260) @ (r next * 260).
+			canvas add: composite ].
+		1 to: 60 do: [ :i | canvas add: (RSBox new size: 30; model: i negated; position: (r next * 300) @ (r next * 300); yourself) ] ].
+	points do: [ :p |
+		self assert: (self modelsAt: p in: canvases second) equals: (self modelsAt: p in: canvases first) ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testLayoutAfterAdd [
+	"shapes added at 0@0 to an RTree canvas, then laid out: every removal had to search a tree
+	of identical rectangles. The result must equal useList"
+	| canvases |
+	canvases := self canvasesWith: [ :canvas | | shapes |
+		shapes := (1 to: 500) collect: [ :i | RSBox new size: 10; model: i; yourself ].
+		canvas addAll: shapes.
+		RSGridLayout on: shapes ].
+	canvases second shapes with: canvases first shapes do: [ :a :b |
+		self assert: a position equals: b position.
+		self assert: (self modelsAt: a position in: canvases second) equals: (self modelsAt: b position in: canvases first) ].
+	self assert: canvases second shapeCollection isTotalBalanced
+]
