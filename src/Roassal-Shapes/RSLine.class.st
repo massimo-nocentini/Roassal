@@ -59,3 +59,16 @@ RSLine >> basicIncludesPoint: aPoint [
 RSLine >> buildPathOn: visitor [
 	visitor buildLinePath: self
 ]
+
+{ #category : 'testing' }
+RSLine >> spatialSegment [
+	"{ start. end. halfWidth } for RTGridCollection in segment aware mode, which then registers me
+	only in the cells along the segment, not in every cell of my rectangle. Every point I accept
+	must be at most halfWidth from the segment. basicIncludesPoint: accepts the points at most
+	w = width / 2 from the infinite line through the end points, inside the box of the end points
+	widened by w: such a point is at most w * sqrt(2) past an end point along the line, so at most
+	w * sqrt(3) from the segment, and 2 * w is enough. A marker accepts points away from the
+	segment: then nil, and the collection uses my rectangle"
+	(self hasBorder not or: [ self hasMarkers ]) ifTrue: [ ^ nil ].
+	^ { self startPoint. self endPoint. self includedRadius * 2 }
+]

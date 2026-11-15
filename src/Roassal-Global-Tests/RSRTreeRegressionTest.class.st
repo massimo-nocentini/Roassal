@@ -87,6 +87,32 @@ RSRTreeRegressionTest >> hitTestPointsIn: aCanvas [
 ]
 
 { #category : 'helpers' }
+RSRTreeRegressionTest >> longEdgesCanvasWith: aShapeCollection [
+	"60 boxes and 300 lines between random boxes, so most of the lines are long; a few have a
+	marker, about half of the shapes have an event callback"
+	| canvas random boxes |
+	canvas := RSCanvas new.
+	canvas shapeCollection: aShapeCollection.
+	random := Random seed: 21.
+	boxes := (1 to: 60) collect: [ :i |
+		RSBox new size: 12; model: i; position: (random next * 1000) @ (random next * 1000); yourself ].
+	canvas addAll: boxes.
+	1 to: 300 do: [ :i | | line |
+		line := RSLine new
+			from: (boxes at: (random nextInteger: boxes size));
+			to: (boxes at: (random nextInteger: boxes size));
+			width: random next * 6 + 0.5;
+			model: i negated;
+			yourself.
+		i \\ 25 = 0 ifTrue: [ line markerEnd: (RSBox new size: 10; yourself) asMarker ].
+		i \\ 7 = 0 ifTrue: [ line capRound ].
+		canvas add: line ].
+	canvas shapes do: [ :each |
+		random next < 0.5 ifTrue: [ each when: RSMouseClick do: [  ] for: self ] ].
+	^ canvas
+]
+
+{ #category : 'helpers' }
 RSRTreeRegressionTest >> modelOf: aShapeOrCanvas in: aCanvas [
 	"shapeWithActionForPositionInPixels: answers the canvas when no shape has an action there"
 	^ aShapeOrCanvas == aCanvas
@@ -167,6 +193,70 @@ RSRTreeRegressionTest >> testBitmapFormUpdatesTheShapeCollection [
 			bitmap translateTo: 50 @ 50.
 			self assert: (self modelsAt: 140 @ 140 in: canvas) equals: #( #bitmap ).
 			self assert: (self modelsAt: -60 @ -60 in: canvas) isEmpty ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testLineSpatialSegmentContainsTheAcceptedPoints [
+	"RSLine>>spatialSegment lets RTGridCollection in segment aware mode register a line only in
+	the cells along it: every point the line accepts must be at most the half width from the
+	segment. Lines with a marker, polylines and beziers have none"
+	| random |
+	random := Random seed: 4.
+	1 to: 40 do: [ :i | | start end line segment rectangle |
+		start := (random next * 100) @ (random next * 100).
+		end := i \\ 10 = 1
+			ifTrue: [ start ]
+			ifFalse: [
+				i \\ 10 = 2
+					ifTrue: [ start x @ (random next * 100) ]
+					ifFalse: [ i \\ 10 = 3
+						ifTrue: [ (random next * 100) @ start y ]
+						ifFalse: [ (random next * 100) @ (random next * 100) ] ] ].
+		line := RSLine new startPoint: start; endPoint: end; width: random next * 10 + 0.5; yourself.
+		i \\ 3 = 0 ifTrue: [ line capRound ].
+		i \\ 3 = 1 ifTrue: [ line capSquare ].
+		segment := line spatialSegment.
+		self assert: segment first equals: start.
+		self assert: segment second equals: end.
+		rectangle := line encompassingRectangle expandBy: 2.
+		1 to: 400 do: [ :j | | p |
+			p := rectangle origin + ((random next * rectangle width) @ (random next * rectangle height)).
+			(line includesPoint: p) ifTrue: [
+				self assert: (self distanceFrom: p toSegment: segment) <= segment third ] ].
+		"the corners of the rectangle are the farthest points"
+		line encompassingRectangle corners do: [ :p |
+			(line includesPoint: p) ifTrue: [
+				self assert: (self distanceFrom: p toSegment: segment) <= segment third ] ] ].
+	self assert: (RSLine new startPoint: 0 @ 0; endPoint: 10 @ 0; markerEnd: RSBox new asMarker; yourself) spatialSegment isNil.
+	self assert: (RSArrowedLine new startPoint: 0 @ 0; endPoint: 10 @ 0; yourself) spatialSegment isNil.
+	self assert: (RSPolyline new controlPoints: { 0 @ 0. 10 @ 0. 10 @ 10 }; yourself) spatialSegment isNil.
+	self assert: (RSBezier new controlPoints: { 0 @ 0. 10 @ 0. 10 @ 10 }; yourself) spatialSegment isNil
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testSegmentAwareGridAgreesWithTheList [
+	"a canvas of long edges with RTGridCollection in segment aware mode, where the lines are
+	registered along their spatialSegment, answers the hits of useList, also after the boxes move"
+	| reference grid points |
+	reference := self longEdgesCanvasWith: RTSequenceableCollection new.
+	grid := self longEdgesCanvasWith: (RTGridCollection new segmentAware: true; yourself).
+	1 to: 2 do: [ :round | | random |
+		points := self hitTestPointsIn: reference.
+		"points across the lines, inside or just outside their stroke"
+		random := Random seed: round.
+		reference lines do: [ :line | | start vector normal |
+			start := line startPoint.
+			vector := line endPoint - start.
+			normal := vector normal.
+			1 to: 6 do: [ :i |
+				points add: start + (vector * (random next * 1.2 - 0.1)) + (normal * (random next - 0.5) * (line width + 1)) ] ].
+		points do: [ :p |
+			self assert: (self modelsAt: p in: grid) equals: (self modelsAt: p in: reference).
+			self
+				assert: ((grid shapeWithActionForPosition: p) ifNotNil: [ :shape | shape model ])
+				equals: ((reference shapeWithActionForPosition: p) ifNotNil: [ :shape | shape model ]) ].
+		{ reference. grid } do: [ :canvas |
+			(canvas nodes first: 20) doWithIndex: [ :each :i | each translateBy: (i * 13) @ (i * -7) ] ] ]
 ]
 
 { #category : 'tests' }
@@ -369,6 +459,19 @@ RSRTreeRegressionTest >> assertConsistent: aCanvas [
 		ifFalse: [
 			aCanvas privateShapes do: [ :each |
 				self assert: ((aCanvas shapeCollection entriesAtRectangle: each encompassingRectangle) includes: each) ] ]
+]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> distanceFrom: aPoint toSegment: aSegment [
+	"the distance from aPoint to the segment of a spatialSegment"
+	| start end vector t |
+	start := aSegment first.
+	end := aSegment second.
+	vector := end - start.
+	t := (vector x = 0 and: [ vector y = 0 ])
+		ifTrue: [ 0 ]
+		ifFalse: [ (((aPoint - start) dotProduct: vector) / (vector dotProduct: vector)) min: 1 max: 0 ].
+	^ aPoint distanceTo: start + (vector * t)
 ]
 
 { #category : 'helpers' }
