@@ -196,6 +196,39 @@ RSRTreeRegressionTest >> testShapeWithActionIsTheFirstShapeWithAction [
 ]
 
 { #category : 'tests' }
+RSRTreeRegressionTest >> testRendererCullsAsTheShapeCollection [
+	"RSAthensRenderer>>shapesOf:intersecting: answers the shapes of the container, without a query,
+	when the rectangle strictly contains the bounds of an R-tree: it must answer what
+	entriesAtRectangle: answers, in the same order, and the images must not depend on the
+	collection, at zoom to fit or zoomed in, with composites"
+	| renderer forms |
+	renderer := RSAthensRenderer new.
+	forms := self collectionClasses collect: [ :collectionClass | | canvas containers bounds |
+		canvas := self hitTestCanvasWith: collectionClass.
+		containers := { canvas }, (canvas allChildren select: [ :each | each isComposite ]).
+		containers do: [ :container |
+			bounds := container shapeCollection bounds.
+			{ bounds. bounds expandBy: 1. bounds expandBy: 100. bounds insetBy: 5. bounds origin extent: bounds extent / 3. (bounds center + 1000) extent: 10 @ 10 }
+				do: [ :rectangle |
+					self
+						assert: (renderer shapesOf: container intersecting: rectangle) asArray
+						equals: (container shapeCollection entriesAtRectangle: rectangle) asArray ] ].
+		canvas extent: 400 @ 300.
+		canvas zoomToFit.
+		canvas invalidate.
+		"the R-trees take the shortcut at zoom to fit"
+		self
+			assert: (renderer shapesOf: canvas intersecting: canvas visibleRectangle) == canvas privateShapes
+			equals: (renderer hasCheapBounds: canvas shapeCollection).
+		{ canvas asForm bits copy } , (
+			{ 120 @ 120. 200 @ 60 } collect: [ :center |
+				canvas camera zoomToFit: canvas extent rectangle: (center - 30 extent: 60 @ 60).
+				canvas invalidate.
+				canvas asForm bits copy ]) ].
+	forms allButFirst do: [ :each | self assert: each equals: forms first ]
+]
+
+{ #category : 'tests' }
 RSRTreeRegressionTest >> testRotateByRadiansResetsTheBoundingBox [
 	"rotateByRadians: did not reset the bounding box, unlike rotateByDegrees:"
 	(self canvasesWith: [ :canvas |

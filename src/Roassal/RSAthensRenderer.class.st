@@ -561,6 +561,14 @@ RSAthensRenderer >> getOrCreatePathOf: shape [
 	^ path
 ]
 
+{ #category : 'visiting - helpers' }
+RSAthensRenderer >> hasCheapBounds: aShapeCollection [
+	"The R-trees answer their bounds from their root. RTSequenceableCollection scans its shapes
+	again after one of them moved (and its entriesAtRectangle: is already a scan in drawing
+	order), the other collections scan them at every call"
+	^ (aShapeCollection isKindOf: RTreeCollection) or: [ aShapeCollection isKindOf: RTNaryTreeCollection ]
+]
+
 { #category : 'utilities' }
 RSAthensRenderer >> inverseTransform: aRectangle [
 	^ Rectangle encompassing: (aRectangle corners
@@ -598,6 +606,22 @@ RSAthensRenderer >> showEncompassingRectangleForLineIfNecessary: line [
 RSAthensRenderer >> showEncompassingRectangleIfNecessary: shape [
 	showRectangles ifFalse: [ ^ self ].
 	self drawShadowRectangle: shape baseRectangleWithBorder
+]
+
+{ #category : 'visiting - helpers' }
+RSAthensRenderer >> shapesOf: aContainer intersecting: aRectangle [
+	"The shapes of aContainer to draw in aRectangle, in drawing order: those whose rectangle
+	intersects it. When aRectangle strictly contains the bounds of an R-tree, as at zoom to fit,
+	every shape does: the shapes of the container are answered as they are, since the query
+	would test them all and then sort them"
+	| collection bounds |
+	collection := aContainer shapeCollection.
+	(self hasCheapBounds: collection) ifFalse: [ ^ collection entriesAtRectangle: aRectangle ].
+	bounds := collection bounds.
+	(bounds notNil and: [
+		 aRectangle origin < bounds origin and: [ bounds corner < aRectangle corner ] ])
+			ifTrue: [ ^ aContainer privateShapes ].
+	^ collection entriesAtRectangle: aRectangle
 ]
 
 { #category : 'accessing' }
@@ -679,7 +703,7 @@ RSAthensRenderer >> visitCanvas: aRSCanvas [
 		self clearRectangle: transformeDirtyRectangle ].
 	modifiedDirtyRectangle := self inverseTransform: transformeDirtyRectangle.
 	athensCanvas clipBy: transformeDirtyRectangle during: [
-		(aRSCanvas shapeCollection entriesAtRectangle: modifiedDirtyRectangle ) do: [ :each | each accept: self ] ].
+		(self shapesOf: aRSCanvas intersecting: modifiedDirtyRectangle) do: [ :each | each accept: self ] ].
 	dirtyRectangle := transformeDirtyRectangle.
 	matrix loadIdentity.
 	originMatrix loadIdentity.
@@ -709,7 +733,7 @@ RSAthensRenderer >> visitChildrenIfNecessary: shape [
 	rectangle :=(rectangle origin max: shape baseRectangle origin)
 		corner: (rectangle corner min: shape baseRectangle corner).
 
-	visibleChildren := shape shapeCollection entriesAtRectangle: rectangle.
+	visibleChildren := self shapesOf: shape intersecting: rectangle.
 
 	athensCanvas clipBy: shape path during: [
 		visibleChildren do: [ :each | each accept: self ] ]
