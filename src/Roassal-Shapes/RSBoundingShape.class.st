@@ -166,10 +166,9 @@ RSBoundingShape >> extent [
 { #category : 'accessing' }
 RSBoundingShape >> extent: aPoint [
 	| oldExtent extent delta |
-	
+	self assertIsFinitePoint: aPoint.
 	extent := self baseRectangleWithBorder extent.
 	extent = aPoint ifTrue: [ ^ self ].
-	self assert: aPoint isPoint.
 	oldExtent := extent.
 	delta := self hasBorder
 		ifTrue: [ border width ]
@@ -381,9 +380,7 @@ RSBoundingShape >> position [
 { #category : 'matrix' }
 RSBoundingShape >> position: aPoint [
 	"This method is private. Use #translateTo: instead."
-	self
-		assert: [ (aPoint x isNaN | aPoint y isNaN) not ]
-		description: 'you must provide a real point'.
+	self assertIsFinitePoint: aPoint.
 	matrix translation: aPoint.
 	self resetBBox.
 	self updateConnectedLines

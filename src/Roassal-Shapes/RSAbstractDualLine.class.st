@@ -44,6 +44,7 @@ RSAbstractDualLine >> endPoint [
 
 { #category : 'accessing' }
 RSAbstractDualLine >> endPoint: point [
+	self assertIsFinitePoint: point.
 	endPoint = point ifTrue: [ ^ self ].
 	endPoint := point.
 	self resetPath.
@@ -80,6 +81,7 @@ RSAbstractDualLine >> startPoint [
 
 { #category : 'accessing' }
 RSAbstractDualLine >> startPoint: point [
+	self assertIsFinitePoint: point.
 	startPoint = point ifTrue: [ ^ self ].
 	startPoint := point.
 	self resetPath

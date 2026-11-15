@@ -63,7 +63,10 @@ RSAbstractControlPointsLine class >> isAbstract [
 
 { #category : 'transforming' }
 RSAbstractControlPointsLine >> basicTranslateBy: delta [
-	controlPoints := controlPoints collect: [:p | p + delta ]
+	| points |
+	points := controlPoints collect: [:p | p + delta ].
+	points do: [ :each | self assertIsFinitePoint: each ].
+	controlPoints := points
 ]
 
 { #category : 'accessing' }
@@ -73,7 +76,10 @@ RSAbstractControlPointsLine >> controlPoints [
 
 { #category : 'accessing' }
 RSAbstractControlPointsLine >> controlPoints: anArrayOfPoints [
-	controlPoints := anArrayOfPoints collect: #asFloatPoint.
+	| points |
+	points := anArrayOfPoints collect: #asFloatPoint.
+	points do: [ :each | self assertIsFinitePoint: each ].
+	controlPoints := points.
 	self resetPath
 ]
 
@@ -94,6 +100,7 @@ RSAbstractControlPointsLine >> endPoint [
 
 { #category : 'accessing' }
 RSAbstractControlPointsLine >> endPoint: aPoint [
+	self assertIsFinitePoint: aPoint.
 	self controlPoints
 		at: self controlPoints size
 		put: aPoint.
@@ -120,6 +127,7 @@ RSAbstractControlPointsLine >> startPoint [
 
 { #category : 'accessing' }
 RSAbstractControlPointsLine >> startPoint: aPoint [
+	self assertIsFinitePoint: aPoint.
 	self controlPoints at: 1 put: aPoint.
 	self resetPath
 ]

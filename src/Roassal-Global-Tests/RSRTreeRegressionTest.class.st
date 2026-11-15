@@ -146,3 +146,54 @@ RSRTreeRegressionTest >> testLayoutAfterAdd [
 		self assert: (self modelsAt: a position in: canvases second) equals: (self modelsAt: b position in: canvases first) ].
 	self assert: canvases second shapeCollection isTotalBalanced
 ]
+
+{ #category : 'helpers' }
+RSRTreeRegressionTest >> nonFinitePoints [
+	^ {
+		  (Float nan @ 10).
+		  (10 @ Float nan).
+		  (Float infinity @ 10).
+		  (10 @ Float infinity negated) }
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testNonFiniteExtentOrPositionIsRejected [
+	"a NaN or infinite extent gave the box a NaN rectangle: in an RTree canvas the boxes next to it
+	could no longer be found, and moving them signaled NotFound. The setters signal an
+	AssertionFailure and leave the shape as it was"
+	(self canvasesWith: [ :canvas |
+		0 to: 15 do: [ :i |
+			canvas add: (RSBox new size: 10; model: i; position: (i \\ 4 * 20) @ (i // 4 * 20); yourself) ] ])
+		do: [ :canvas | | box |
+			box := canvas shapes first.
+			self nonFinitePoints do: [ :point |
+				self should: [ box extent: point ] raise: AssertionFailure.
+				self should: [ box translateTo: point ] raise: AssertionFailure.
+				self should: [ box translateBy: point ] raise: AssertionFailure ].
+			self assert: box extent equals: 10 @ 10.
+			self assert: box position equals: 0 @ 0.
+			canvas shapes do: [ :each |
+				each translateBy: 1 @ 1.
+				self assert: (self modelsAt: each position in: canvas) equals: { each model } ] ]
+]
+
+{ #category : 'tests' }
+RSRTreeRegressionTest >> testNonFiniteLinePointsAreRejected [
+	"lines accepted NaN or infinite end and control points, with the same effect as a NaN extent"
+	(self canvasesWith: [ :canvas |
+		canvas add: (RSLine new startPoint: 0 @ 0; endPoint: 100 @ 0; model: #line; yourself).
+		canvas add: (RSPolyline new controlPoints: { 0 @ 20. 50 @ 20. 100 @ 20 }; model: #polyline; yourself).
+		canvas add: (RSBezier new controlPoints: { 0 @ 40. 50 @ 40. 100 @ 40 }; model: #bezier; yourself) ])
+		do: [ :canvas |
+			canvas shapes do: [ :line |
+				self nonFinitePoints do: [ :point |
+					self should: [ line startPoint: point ] raise: AssertionFailure.
+					self should: [ line endPoint: point ] raise: AssertionFailure.
+					self should: [ line controlPoints: { 0 @ 0. point } ] raise: AssertionFailure.
+					self should: [ line translateBy: point ] raise: AssertionFailure ].
+				self assert: line startPoint y equals: line endPoint y ].
+			self assert: (self modelsAt: 50 @ 0 in: canvas) equals: #( #line ).
+			self assert: (self modelsAt: 50 @ 20 in: canvas) equals: #( #polyline ).
+			canvas shapes do: [ :line | line translateBy: 0 @ 5 ].
+			self assert: (self modelsAt: 50 @ 25 in: canvas) equals: #( #polyline ) ]
+]

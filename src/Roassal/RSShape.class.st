@@ -164,6 +164,23 @@ RSShape >> addedIn: aCanvas [
 	self announce: evt
 ]
 
+{ #category : 'private' }
+RSShape >> assertIsFinitePoint: aPoint [
+	"Signal an AssertionFailure unless aPoint is a point with finite coordinates.
+	A NaN or infinite coordinate gives the shape a NaN encompassing rectangle: the shape is
+	neither drawn nor found, and in a canvas that uses an RTree the shapes next to it can no
+	longer be found or removed. The setters of positions, extents and line points check their
+	argument, so that the error is signaled where the value comes from"
+
+	self
+		assert: [
+			aPoint isPoint and: [
+				aPoint x isNaN not and: [
+					aPoint y isNaN not and: [
+						aPoint x isInfinite not and: [ aPoint y isInfinite not ] ] ] ] ]
+		description: [ 'A shape needs a point with finite coordinates, not ', aPoint printString ]
+]
+
 { #category : 'announcer' }
 RSShape >> announce: anEventOrAnEventClassOrABlock [
 
