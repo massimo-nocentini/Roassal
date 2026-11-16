@@ -2367,19 +2367,21 @@ RSAnimationExamples >> example35Roassal [
 			when: RSAnimationEndEvent do: [ lbl remove ] for: self ].
 	canvas newAnimation
 		duration: (timeSize * text size) milliSeconds;
-		when: RSAnimationEndEvent do: [
-			canvas addShape: (RSLabel new
+		when: RSAnimationEndEvent do: [ | label |
+			label := RSLabel new
 						 text: text;
 						 bold;
 						 position: 5 @ -50;
 						 fontName: 'Marker Felt';
 						 color: Color white;
-						 fontSize: 30).
+						 fontSize: 30;
+						 yourself.
+			canvas addShape: label.
 			canvas newAnimation
 				easing: RSEasingInterpolator elasticOut;
 				from: -1;
 				to: 0;
-				onStepDo: [ :t | canvas shapes last matrix shy: t ] ]
+				onStepDo: [ :t | label matrixDo: [ :matrix | matrix shy: t ] ] ]
 		for: self.
 	canvas
 		when: RSExtentChangedEvent

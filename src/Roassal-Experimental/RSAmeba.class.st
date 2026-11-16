@@ -31,14 +31,16 @@ RSAmeba >> blink [
 				 range: { 1. 0.05. 1 });
 		duration: 500 milliSeconds;
 		onStepDo: [ :t |
-			leftEye matrix
-				loadIdentity;
-				scaleBy: 1 @ t;
-				translation: p1.
-			rightEye matrix
-				loadIdentity;
-				scaleBy: 1 @ t;
-				translation: p2 ];
+			leftEye matrixDo: [ :matrix |
+				matrix
+					loadIdentity;
+					scaleBy: 1 @ t;
+					translation: p1 ].
+			rightEye matrixDo: [ :matrix |
+				matrix
+					loadIdentity;
+					scaleBy: 1 @ t;
+					translation: p2 ] ];
 		when: RSAnimationEndEvent do: [ shape removeKey: #blink ] for: self
 ]
 

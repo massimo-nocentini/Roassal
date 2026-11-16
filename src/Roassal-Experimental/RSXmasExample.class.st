@@ -268,13 +268,15 @@ RSXmasExample >> title [
 			domain: #(0 0.5 1);
 			range: { 0.8. 1. 0.8 } );
 		onStepDo: [:t |
-			title matrix
-				loadIdentity
-				scaleBy: t.
-			t2020 matrix
-				loadIdentity
-				translation: 0@80;
-				scaleBy: t.
+			title matrixDo: [ :matrix |
+				matrix
+					loadIdentity;
+					scaleBy: t ].
+			t2020 matrixDo: [ :matrix |
+				matrix
+					loadIdentity;
+					translation: 0@80;
+					scaleBy: t ].
 			canvas signalUpdate ].
 
 
