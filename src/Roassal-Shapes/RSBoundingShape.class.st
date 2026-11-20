@@ -19,10 +19,22 @@ Class {
 		'connectedLines',
 		'shouldUpdateLines'
 	],
+	#classVars : [
+		'DefaultBaseRectangle',
+		'DefaultExtent'
+	],
 	#category : 'Roassal-Shapes-Bounding',
 	#package : 'Roassal-Shapes',
 	#tag : 'Bounding'
 }
+
+{ #category : 'class initialization' }
+RSBoundingShape class >> initialize [
+	"The base rectangle and the extent of a new shape, shared by all of them"
+
+	DefaultBaseRectangle := 0 @ 0 corner: 0 @ 0.
+	DefaultExtent := 10 @ 10
+]
 
 { #category : 'testing' }
 RSBoundingShape class >> isAbstract [
@@ -101,6 +113,13 @@ RSBoundingShape >> baseRectangle [
 	^ baseRectangle
 ]
 
+{ #category : 'accessing' }
+RSBoundingShape >> baseRectangleAtPoint: aPoint [
+	"My base rectangle for the extent aPoint, centered at 0@0 (my subclasses may change its shape)"
+
+	^ Rectangle floatCenter: 0 @ 0 extent: aPoint
+]
+
 { #category : 'accessing - computed' }
 RSBoundingShape >> baseRectangleWithBorder [
 	| rectangle |
@@ -114,6 +133,16 @@ RSBoundingShape >> basicTranslateBy: delta [
 	self updateLinesOFF.
 	self position: self position + delta.
 	self updateLinesON
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> boxedWithPad: aPadding [
+	"A composite of me in a white box, padded by aPadding"
+
+	^ self padded: aPadding withBoxDo: [ :box |
+		  box
+			  color: Color white;
+			  borderDo: [ :aBorder | aBorder color: aBorder color translucent ] ]
 ]
 
 { #category : 'accessing - computed' }
@@ -145,8 +174,15 @@ RSBoundingShape >> connectedLines: aCollection [
 ]
 
 { #category : 'defaults' }
+RSBoundingShape >> defaultBaseRectangle [
+
+	^ DefaultBaseRectangle
+]
+
+{ #category : 'defaults' }
 RSBoundingShape >> defaultExtent [
-	^ 10@10
+
+	^ DefaultExtent
 ]
 
 { #category : 'accessing' }
@@ -173,7 +209,7 @@ RSBoundingShape >> extent: aPoint [
 	delta := self hasBorder
 		ifTrue: [ border width ]
 		ifFalse: [ 0 ].
-	baseRectangle := Rectangle floatCenter: 0@0 extent: aPoint - delta.
+	baseRectangle := self baseRectangleAtPoint: aPoint - delta.
 	self resetBBox; resetPath.
 	self announce: [ RSExtentChangedEvent new
 		shape: self;
@@ -286,7 +322,7 @@ RSBoundingShape >> initialize [
 	super initialize.
 	self initializeMatrix; updateEdgesON.
 
-	baseRectangle := 0@0 corner: 0@0.
+	baseRectangle := self defaultBaseRectangle.
 	self extent: self defaultExtent
 ]
 
@@ -342,6 +378,16 @@ RSBoundingShape >> matrixDo: aBlock [
 	self resetBBox
 ]
 
+{ #category : 'composing' }
+RSBoundingShape >> notedWithPad: aPadding [
+	"A composite of me in a white note (RSNote), padded by aPadding"
+
+	^ self padded: aPadding withNoteDo: [ :box |
+		  box
+			  color: Color white;
+			  borderDo: [ :aBorder | aBorder color: aBorder color translucent ] ]
+]
+
 { #category : 'metrics' }
 RSBoundingShape >> numberOfIncomingLines [
 	"Return the number of lines incoming to the shape"
@@ -377,6 +423,60 @@ RSBoundingShape >> outgoingNodes [
 RSBoundingShape >> outgoingShapes [
 	"Return the shapes that leaves the shape"
 	^ self outgoingLines collect: #to
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding shape: boxShape do: aBlock [
+	"A composite of me centered in boxShape, larger than me by aPadding on each side and with corners of radius aPadding. aBlock may change boxShape (its first argument) and me (its second one) before"
+
+	| box |
+	box := boxShape
+		       cornerRadius: aPadding;
+		       extent: self extent + aPadding doubled;
+		       yourself.
+
+	aBlock cull: box cull: self.
+
+	RSLocation new
+		center;
+		stick: box on: self.
+
+	^ RSGroup new
+		  add: box;
+		  add: self;
+		  asShape
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withBoxDo: aBlock [
+
+	^ self padded: aPadding shape: RSBox new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withNoteDo: aBlock [
+
+	^ self padded: aPadding shape: RSNote new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> padded: aPadding withSimplerNoteDo: aBlock [
+
+	^ self padded: aPadding shape: RSSimplerNote new do: aBlock
+]
+
+{ #category : 'composing' }
+RSBoundingShape >> paddedWithGoldenRatio [
+	"A composite of me, padded by the half of my larger side times the silver ratio"
+
+	| pad |
+	pad := self extent * Float silverRatio / 2 in: [ :extent |
+		       extent x max: extent y ].
+
+	^ RSComposite new
+		  shapes: { self };
+		  padding: pad;
+		  yourself
 ]
 
 { #category : 'matrix' }

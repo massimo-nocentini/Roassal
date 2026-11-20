@@ -709,6 +709,30 @@ RSdeCasteljauExamples >> example44deCasteljauRationalLineClosedControlPoints [
 		  yourself
 ]
 
+{ #category : 'examples' }
+RSdeCasteljauExamples >> example46NoteInteger [
+	"lines"
+
+	<script: 'self new example46NoteInteger open'>
+	^ RSCanvas new
+		  add: self noteInteger;
+		  zoomToFit;
+		  addInteraction: RSCanvasController new;
+		  yourself
+]
+
+{ #category : 'examples' }
+RSdeCasteljauExamples >> example46NoteLoremIpsum [
+	"lines"
+
+	<script: 'self new example46NoteLoremIpsum open'>
+	^ RSCanvas new
+		  add: self noteLoremIpsum;
+		  zoomToFit;
+		  addInteraction: RSCanvasController new;
+		  yourself
+]
+
 { #category : 'shapes' }
 RSdeCasteljauExamples >> lineDeCasteljauLineClosedControlPoints [
 	"lines"
@@ -787,4 +811,25 @@ RSdeCasteljauExamples >> linesDeCasteljauLineDegreeElevation [
 		  with: bspline2
 		  with: bspline3
 		  with: bspline4
+]
+
+{ #category : 'shapes' }
+RSdeCasteljauExamples >> noteInteger [
+	"lines"
+
+	^ RSLabel new
+		  model: Number firstCarmichaelNumber;
+		  useDefaultCodeFont;
+		  notedWithPad: Float goldenPlatinumRatio
+]
+
+{ #category : 'shapes' }
+RSdeCasteljauExamples >> noteLoremIpsum [
+	"lines"
+
+	^ RSLabel new
+		  text: (String loremIpsum: 50);
+		  useDefaultCodeFont;
+		  padded: Float goldenPlatinumRatio
+		  withNoteDo: [ :aBox | aBox color: Color yellow translucent ]
 ]

@@ -253,6 +253,110 @@ RSAthensRenderer >> buildLinePath: line [
 ]
 
 { #category : 'creating path' }
+RSAthensRenderer >> buildNotePath: aNoteShape [
+	"A box whose sides are de Casteljau lines through points shaken by a Gaussian, joined by C1 junctions (RSNote)"
+
+	| n rectangle random left lPoints bPoints rPoints tPoints bottom right top block m nSamples mSamples finalLine radius ratio cp lcp bcp rcp tcp designRect |
+	rectangle := aNoteShape baseRectangle.
+	random := aNoteShape randomGaussian.
+	block := aNoteShape coinBlock.
+
+	radius := aNoteShape hasCornerRadius
+		          ifTrue: [ aNoteShape cornerRadius ]
+		          ifFalse: [ aNoteShape defaultCornerRadius ].
+
+	n := rectangle height max: 1.
+	m := rectangle width max: 1.
+
+	n > m
+		ifTrue: [
+			ratio := n / m.
+			m := (m log: 2) ceiling max: 4.
+			n := ratio ceiling * m ]
+		ifFalse: [
+			ratio := m / n.
+			n := (n log: 2) ceiling max: 4.
+			m := ratio ceiling * n ].
+
+	lPoints := ((rectangle top + radius topLeft to:
+	             rectangle bottom - radius bottomLeft) chebyshev: n)
+		           collect: [ :each | rectangle left + random next @ each ].
+
+	rPoints := ((rectangle bottom - radius bottomRight to:
+	             rectangle top + radius topRight) chebyshev: n) collect: [
+		           :each | rectangle right + random next @ each ].
+
+	bPoints := ((rectangle left + radius bottomLeft to:
+	             rectangle right - radius bottomRight) chebyshev: m)
+		           collect: [ :each |
+		           each @ (rectangle bottom + random next) ].
+
+	tPoints := ((rectangle right - radius topRight to:
+	             rectangle left + radius topLeft) chebyshev: m) collect: [
+		           :each | each @ (rectangle top + random next) ].
+
+	"designRect := {
+		              lPoints.
+		              rPoints.
+		              bPoints.
+		              tPoints }
+		              inject: (0 @ 0 corner: 0 @ 0)
+		              into: [ :r :designPoints |
+			              r encompass:
+				              (Rectangle encompassing: designPoints) extent ].
+
+	aNoteShape extent: designRect extent."
+
+	nSamples := n << 2.
+	mSamples := m << 2.
+
+	left := RSdeCasteljauLine new
+		        samplesChebyshev: nSamples;
+		        controlPoints: lPoints;
+		        yourself.
+
+	bottom := RSdeCasteljauLine new
+		          samplesChebyshev: mSamples;
+		          controlPoints: bPoints;
+		          yourself.
+
+	right := RSdeCasteljauLine new
+		         samplesChebyshev: nSamples;
+		         controlPoints: rPoints;
+		         yourself.
+
+	top := RSdeCasteljauLine new
+		       samplesChebyshev: mSamples;
+		       controlPoints: tPoints;
+		       yourself.
+
+	bottom := left junction: bottom right: block.
+	right := bottom junction: right right: block.
+	top := right junction: top right: block.
+	left := top junction: left right: block.
+
+	lcp := left controlPoints.
+	bcp := bottom controlPoints.
+	rcp := right controlPoints.
+	tcp := top controlPoints.
+
+	cp := Array
+		      new: lcp size + bcp size + rcp size + tcp size
+		      streamContents: [ :stream |
+			      stream
+				      nextPutAll: lcp;
+				      nextPutAll: bcp;
+				      nextPutAll: rcp;
+				      nextPutAll: tcp ].
+
+	finalLine := RSPolyline new
+		             controlPoints: cp;
+		             yourself.
+
+	self buildPolylinePath: finalLine
+]
+
+{ #category : 'creating path' }
 RSAthensRenderer >> buildPolygonPath: polygon [
 	| first radius cp |
 	builder absolute.
@@ -458,6 +562,144 @@ RSAthensRenderer >> buildRingPath: ring [
 RSAthensRenderer >> buildSegmentedBeziersPolylinePath: line [
 
 	line splits do: [ :bezier | self buildBezierPath: bezier ]
+]
+
+{ #category : 'creating path' }
+RSAthensRenderer >> buildSimpleBoxPath: box [
+	"The four sides of the base rectangle of box, without its corner radius"
+
+	| rectangle |
+	rectangle := box baseRectangle.
+	builder
+		absolute;
+		moveTo: rectangle topLeft;
+		lineTo: rectangle topRight;
+		lineTo: rectangle bottomRight;
+		lineTo: rectangle bottomLeft;
+		lineTo: rectangle topLeft;
+		closePath
+]
+
+{ #category : 'creating path' }
+RSAthensRenderer >> buildSimplerNotePath: aNoteShape [
+	"A box whose sides and corners are Beziers shaken by a bivariate Gaussian (RSSimplerNote)"
+
+	| rectangle random radius topLeftLine topRightLine bottomRightLine bottomLeftLine topLines rightLines bottomLines leftLines |
+	rectangle := aNoteShape baseRectangle.
+
+	random := aNoteShape newRandom.
+
+	radius := aNoteShape hasCornerRadius
+		          ifTrue: [ aNoteShape cornerRadius ]
+		          ifFalse: [
+			          RSCornerRadius new
+				          radius: random next x abs;
+				          yourself ].
+
+	topLeftLine := radius
+		               asBezierTopLeftPoint: rectangle topLeft
+		               random: random.
+
+	topRightLine := radius
+		                asBezierTopRightPoint: rectangle topRight
+		                random: random.
+
+	bottomRightLine := radius
+		                   asBezierBottomRightPoint: rectangle bottomRight
+		                   random: random.
+
+	bottomLeftLine := radius
+		                  asBezierBottomLeftPoint: rectangle bottomLeft
+		                  random: random.
+
+	topLines := (topLeftLine joinC1Last: topRightLine)
+		            splitXrandom: random
+		            convex: -1
+		            lessThanBound: radius topLeft + radius topRight.
+
+	topLines ifEmpty: [
+		| cps |
+		cps := Array new: 4.
+
+		cps
+			at: 1 put: topLeftLine controlPoints last;
+			at: 2 put: topLeftLine lastC1Point;
+			at: 3 put: topRightLine controlPoints third;
+			at: 4 put: topRightLine controlPoints fourth.
+
+		topRightLine controlPoints: cps ].
+
+	rightLines := (topRightLine joinC1Last: bottomRightLine)
+		              splitYrandom: random
+		              convex: 1
+		              lessThanBound: radius topRight + radius bottomRight.
+
+	rightLines ifEmpty: [
+		| cps |
+		cps := Array new: 4.
+
+		cps
+			at: 1 put: topRightLine controlPoints last;
+			at: 2 put: topRightLine lastC1Point;
+			at: 3 put: bottomRightLine controlPoints third;
+			at: 4 put: bottomRightLine controlPoints fourth.
+
+		bottomRightLine controlPoints: cps ].
+
+	bottomLines := (bottomRightLine joinC1Last: bottomLeftLine)
+		               splitXrandom: random
+		               convex: 1
+		               lessThanBound: radius bottomRight + radius bottomLeft.
+
+	bottomLines ifEmpty: [
+		| cps |
+		cps := Array new: 4.
+
+		cps
+			at: 1 put: bottomRightLine controlPoints last;
+			at: 2 put: bottomRightLine lastC1Point;
+			at: 3 put: bottomLeftLine controlPoints third;
+			at: 4 put: bottomLeftLine controlPoints fourth.
+
+		bottomLeftLine controlPoints: cps ].
+
+	leftLines := (bottomLeftLine joinC1Last: topLeftLine)
+		             splitYrandom: random
+		             convex: -1
+		             lessThanBound: radius bottomLeft + radius topLeft.
+
+	leftLines ifEmpty: [
+		| cps |
+		cps := Array new: 4.
+
+		cps
+			at: 1 put: bottomLeftLine controlPoints last;
+			at: 2 put: bottomLeftLine lastC1Point;
+			at: 3 put: topLeftLine controlPoints third;
+			at: 4 put: topLeftLine controlPoints fourth.
+
+		topLeftLine controlPoints: cps ].
+
+	builder
+		absolute;
+		moveTo: topLeftLine controlPoints first.
+
+	"Clockwise order matters."
+	(Array streamContents: [ :aStream |
+		 aStream
+			 nextPut: topLeftLine;
+			 nextPutAll: topLines;
+			 nextPut: topRightLine;
+			 nextPutAll: rightLines;
+			 nextPut: bottomRightLine;
+			 nextPutAll: bottomLines;
+			 nextPut: bottomLeftLine;
+			 nextPutAll: leftLines ]) do: [ :each |
+		each joinRound.
+
+		self buildBezierPathWithoutMoving: each ].
+
+	builder closePath
 ]
 
 { #category : 'accessing' }
