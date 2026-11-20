@@ -1,5 +1,5 @@
 "
-I load Roassal from the fork https://github.com/massimo-nocentini/Roassal with RTree from the fork https://github.com/massimo-nocentini/RTree (branch master), instead of the pharo-graphics repositories:
+I load Roassal from the fork https://github.com/massimo-nocentini/Roassal with RTree and RoassalLayouts from the forks https://github.com/massimo-nocentini/RTree and https://github.com/massimo-nocentini/RoassalLayouts (branch master), instead of the pharo-graphics repositories:
 
 	Metacello new
 		baseline: 'RoassalMN';
@@ -12,11 +12,11 @@ I load Roassal from the fork https://github.com/massimo-nocentini/Roassal with R
 
 Pharo ships Roassal, and Metacello asks whether to load the new versions over its packages (MCMergeOrLoadWarning): answer Load, as the onWarning: block does. A plain resume (onWarningLog) keeps the methods of the image.
 
-I am BaselineOfRoassal with another repository for RTree: the same packages and groups (Core, Examples, Tests, Mini, Full, BlocFull...; default is Mini), and the Roassal packages come from the repository I am loaded from.
+I am BaselineOfRoassal with other repositories for RTree and RoassalLayouts: the same packages and groups (Core, Examples, Tests, Mini, Full, BlocFull...; default is Mini), and the Roassal packages come from the repository I am loaded from.
 
 My superclass must be in the image before I am loaded. Pharo 15 ships it; in an image without it, first send `Metacello new baseline: 'Roassal'; repository: 'github://massimo-nocentini/Roassal:Pharo15/src'; get`. I do not load Roassal as a nested project: Metacello would keep the Roassal and RTree projects that Pharo already registers.
 
-Metacello loads me, not my superclass, from my repository: the BaselineOfRoassal of the image (the one of Pharo 15) builds the spec. So I add what this repository's BaselineOfRoassal has more than Pharo's, when the image's lacks it (when #hasOwnSuperclass answers false) the packages Roassal-Utils and Roassal-Utils-Tests, and their dependency on VMPluginsPrimitives (github://massimo-nocentini/vm-plugins-primitives.st).
+Metacello loads me, not my superclass, from my repository: the BaselineOfRoassal of the image (the one of Pharo 15) builds the spec. So I add what this repository's BaselineOfRoassal has more than Pharo's, when the image's lacks it (when #hasOwnSuperclass answers false): the packages Roassal-Utils and Roassal-Utils-Tests, and their dependency on VMPluginsPrimitives (github://massimo-nocentini/vm-plugins-primitives.st).
 "
 Class {
 	#name : 'BaselineOfRoassalMN',
@@ -62,6 +62,16 @@ BaselineOfRoassalMN >> hasOwnSuperclass [
 	"Whether the image has the BaselineOfRoassal of my repository, rather than the one of Pharo 15, which lacks what I add when this answers false"
 
 	^ BaselineOfRoassal includesSelector: #vmPluginsPrimitives:
+]
+
+{ #category : 'dependencies' }
+BaselineOfRoassalMN >> layouts: spec [
+	"The fork of RoassalLayouts, with its tree layouts (Van der Ploeg's)"
+
+	spec
+		baseline: 'RoassalLayouts'
+		with: [
+		spec repository: 'github://massimo-nocentini/RoassalLayouts:master/src' ]
 ]
 
 { #category : 'dependencies' }
