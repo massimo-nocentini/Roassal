@@ -64,11 +64,16 @@ BaselineOfRoassal >> baselineOfCommon: spec [
 			dataFrame: spec;
 			aiDatasets: spec;
 			layouts: spec;
-			rtree: spec.
+			rtree: spec;
+			vmPluginsPrimitives: spec.
 
-		spec package: #Roassal with: [ spec requires: #( 'Geometry' 'NumericScales' 'RoassalLayouts' 'RTree' ) ].
+		spec package: #Roassal with: [ spec requires: #( 'Geometry' 'NumericScales' 'RoassalLayouts' 'RTree' 'VMPluginsPrimitives' ) ].
 
 		self corePackagesNames , self examplePackagesNames , self testPackagesNames , self extraPackagesNames do: [ :name | spec package: name ].
+
+		spec
+			package: #'Roassal-Utils' with: [ spec requires: #( 'VMPluginsPrimitives' ) ];
+			package: #'Roassal-Utils-Tests' with: [ spec requires: #( 'Roassal-Utils' ) ].
 
 		spec
 			package: #'Roassal-Bloc' with: [ spec requires: #( 'Bloc' ) ];
@@ -209,4 +214,16 @@ BaselineOfRoassal >> testPackagesNames [
 	'Roassal-SVG-Tests'
 	'Roassal-Utils-Tests'
 	)
+]
+
+{ #category : 'dependencies' }
+BaselineOfRoassal >> vmPluginsPrimitives: spec [
+	"The Smalltalk side of the UtilsPlugin of the Pharo VM (KnuthRandom, UtilsPlugin class>>#deCasteljau:into:at:, Float>>#times:plus:), with a Smalltalk fallback on a VM without the plugin. Its group Core does not load Roassal"
+
+	spec
+		baseline: 'VMPluginsPrimitives'
+		with: [
+			spec
+				repository: 'github://massimo-nocentini/vm-plugins-primitives.st:master/src';
+				loads: #( 'Core' ) ]
 ]
