@@ -105,6 +105,7 @@ BaselineOfRoassal >> bloc: spec [
 { #category : 'API-packages' }
 BaselineOfRoassal >> corePackagesNames [
 	^ #(
+	'Roassal-Utils'
 	'Roassal-Event'
 	'Roassal-Builders'
 	'Roassal-Shapes'
@@ -206,5 +207,6 @@ BaselineOfRoassal >> testPackagesNames [
 	'Roassal-Inspector-Tests'
 	'Roassal-BaselineMap-Tests'
 	'Roassal-SVG-Tests'
+	'Roassal-Utils-Tests'
 	)
 ]
