@@ -78,13 +78,20 @@ RSUtilsTest >> testChoose [
 
 { #category : 'tests' }
 RSUtilsTest >> testExponentiallyWeighted [
+	"beta weighs the previous average, 1 - beta my element, and each average is divided by 1 - (beta ** index), the bias correction of the initial 0"
 
 	self
-		assert: (#( 4 8 0 ) exponentiallyWeighted: 1 / 2) equals: #( 4 6 3 );
-		assert: (#( 4 8 0 ) exponentiallyWeighted: 1) equals: #( 4 8 0 );
-		assert: (#( 4 8 0 ) exponentiallyWeighted: 0) equals: #( 4 4 4 );
+		assert: (#( 1.2 2.3 4.5 5.6 ) exponentiallyWeighted: 0.9 init: 0)
+		equals: #( 1.2 1.7789473684210526 2.783025830258303 3.602151788310556 );
+		assert: (#( 1.2 2.3 4.5 5.6 ) exponentiallyWeighted: 0.9)
+		equals: (#( 1.2 2.3 4.5 5.6 ) exponentiallyWeighted: 0.9 init: 0);
+		assert: (#( 4 8 0 ) exponentiallyWeighted: 1 / 2)
+		equals: { 4. 20 / 3. 20 / 7 };
+		assert: (#( 4 8 0 ) exponentiallyWeighted: 0) equals: #( 4 8 0 );
+		assert: (#( 5 5 5 ) exponentiallyWeighted: 1 / 3) equals: #( 5 5 5 );
 		assert: (#(  ) exponentiallyWeighted: 1 / 2) equals: #(  );
-		assert: ({ 0 @ 0. 2 @ 4 } exponentiallyWeighted: 1 / 2) equals: { 0 @ 0. 1 @ 2 }
+		assert: ({ 0 @ 0. 2 @ 4 } exponentiallyWeighted: 1 / 2)
+		equals: { 0 @ 0. (4 / 3) @ (8 / 3) }
 ]
 
 { #category : 'tests' }

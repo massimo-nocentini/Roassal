@@ -1,16 +1,26 @@
 Extension { #name : 'SequenceableCollection' }
 
 { #category : '*Roassal-Utils' }
-SequenceableCollection >> exponentiallyWeighted: alpha [
-	"The exponentially weighted moving average of my Numbers (or Points), with the smoothing factor alpha in [0, 1]: its first element is my first one, and each other one is alpha times my element plus 1 - alpha times the previous average. An Array of my size"
+SequenceableCollection >> exponentiallyWeighted: beta [
 
-	| averages average |
-	averages := Array new: self size.
-	self isEmpty ifTrue: [ ^ averages ].
-	average := self first.
-	averages at: 1 put: average.
-	2 to: self size do: [ :index |
-		average := (self at: index) * alpha + (average * (1 - alpha)).
-		averages at: index put: average ].
-	^ averages
+	^ self exponentiallyWeighted: beta init: 0
+]
+
+{ #category : '*Roassal-Utils' }
+SequenceableCollection >> exponentiallyWeighted: beta init: init [
+
+	"This message collects according to https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average."
+
+	"(#(1.2 2.3 4.5 5.6) exponentiallyWeighted: 0.9 init: 0) >>> #(1.2 1.7789473684210526 2.783025830258303 3.602151788310556)"
+
+	| betaComplement |
+	betaComplement := 1 - beta.
+	^ self class new: self size streamContents: [ :aStream | 
+		  | w |
+		  w := init.
+		  self withIndexDo: [ :each :index | 
+			  | wCorrected |
+			  w := beta * w + (betaComplement * each).
+			  wCorrected := w / (1 - (beta ** index)).
+			  aStream nextPut: wCorrected ] ]
 ]
