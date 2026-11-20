@@ -10,10 +10,36 @@ Class {
 	#tag : 'Lines'
 }
 
+{ #category : 'actions' }
+RSParametricXYLine >> basicTranslateBy: delta [
+	"I have no design points: translate my functions"
+
+	| xBlock yBlock |
+	xBlock := x.
+	yBlock := y.
+
+	self
+		x: [ :t | (xBlock value: t) + delta x ]
+		y: [ :t | (yBlock value: t) + delta y ]
+]
+
 { #category : 'accessing' }
 RSParametricXYLine >> controlPoints: aSequenceableOfPoints at: t [
 
 	^ (x value: t) @ (y value: t)
+]
+
+{ #category : 'initialization' }
+RSParametricXYLine >> initialize [
+	"The point 0 @ 0, as the default control points of RSAbstractControlPointsLine, for the parameters 0 and 1"
+
+	super initialize.
+
+	self
+		parameterization: (RSLinspaceParameterization new
+				 from: 0 to: 1 samples: 2;
+				 yourself);
+		x: [ :t | 0 ] y: [ :t | 0 ]
 ]
 
 { #category : 'accessing' }

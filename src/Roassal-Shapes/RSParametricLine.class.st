@@ -17,7 +17,7 @@ Class {
 RSParametricLine class >> isAbstract [
 	"testing"
 
-	^ true
+	^ self == RSParametricLine
 ]
 
 { #category : 'accessing' }
@@ -114,6 +114,13 @@ RSParametricLine >> asGroupWithControlNetColoured: aColor [
 		  circles with: labels do: [ :circle :label |
 			  circle border color: translucentColor.
 			  label color: translucentColor ] ]
+]
+
+{ #category : 'actions' }
+RSParametricLine >> basicTranslateBy: delta [
+	"Translate my design points: my curve, an affine combination of them, moves with them. RSAbstractControlPointsLine would translate the points of my curve only, which my design points overwrite at their next change"
+
+	self controlPoints: (self designPoints collect: [ :each | each + delta ])
 ]
 
 { #category : 'accessing' }
@@ -253,6 +260,13 @@ RSParametricLine >> parameterized_RSIntervalParameterization: aParameterization 
 	"accessing"
 
 	parameterization := aParameterization
+]
+
+{ #category : 'accessing' }
+RSParametricLine >> position: aPoint [
+	"Translate my curve so that its center is aPoint. RSAbstractControlPointsLine>>#position: would make the points of my curve my design points"
+
+	self basicTranslateBy: aPoint - self position
 ]
 
 { #category : 'accessing' }

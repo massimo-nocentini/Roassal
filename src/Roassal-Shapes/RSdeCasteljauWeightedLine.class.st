@@ -24,3 +24,12 @@ RSdeCasteljauWeightedLine >> weights: anObject [
 
 	weights := anObject
 ]
+
+{ #category : 'initialization' }
+RSdeCasteljauWeightedLine >> initialize [
+	"The weights of the two default control points, before my superclass computes my curve: the polynomial one"
+
+	weights := #( 1 1 ).
+
+	super initialize
+]

@@ -44,3 +44,12 @@ RSdeCasteljauPolarLine >> ratio: anObject [
 
 	ratio := anObject
 ]
+
+{ #category : 'initialization' }
+RSdeCasteljauPolarLine >> initialize [
+	"The polar line of the midpoints of the sides of my control polygon, before my superclass computes my curve"
+
+	ratio := 1 / 2.
+
+	super initialize
+]

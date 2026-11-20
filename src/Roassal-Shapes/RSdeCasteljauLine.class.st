@@ -215,7 +215,9 @@ RSdeCasteljauLine >> initialize [
 
 	super initialize.
 
-	self samplesLinspace: 2
+	self
+		samplesLinspace: 2;
+		controlPoints: { 0 @ 0. 0 @ 0 }
 ]
 
 { #category : 'adding' }
