@@ -170,6 +170,22 @@ RSAthensRenderer >> buildBezierPath: bezier [
 ]
 
 { #category : 'creating path' }
+RSAthensRenderer >> buildBezierPathWithoutMoving: bezier [
+	"As buildBezierPath:, from the current point of the path"
+
+	| points |
+	points := bezier controlPoints.
+	points size = 2 ifTrue: [
+		builder lineTo: points second.
+		^ self ].
+	points size = 3 ifTrue: [
+		builder curveVia: points second to: points third.
+		^ self ].
+	points size = 4 ifTrue: [
+		builder curveVia: points second and: points third to: points fourth ]
+]
+
+{ #category : 'creating path' }
 RSAthensRenderer >> buildBoxPath: box [
 	self buildCornerBoxPath: box
 ]
@@ -436,6 +452,12 @@ RSAthensRenderer >> buildRingPath: ring [
 				to: x4@y4 negated.
 	].
 	builder close
+]
+
+{ #category : 'creating path' }
+RSAthensRenderer >> buildSegmentedBeziersPolylinePath: line [
+
+	line splits do: [ :bezier | self buildBezierPath: bezier ]
 ]
 
 { #category : 'accessing' }
@@ -797,6 +819,31 @@ RSAthensRenderer >> visitLine: line [
 	self showEncompassingRectangleForLineIfNecessary: line.
 	line markerShapesInPositionDo: [ :shape | shape accept: self ].
 	line isDirty: false
+]
+
+{ #category : 'visiting - helpers' }
+RSAthensRenderer >> visitShape: aShape withScaledMatrixDo: aBlock [
+
+	self visitShapeIfNecessary: aShape block: [
+		| lbtranslation |
+		lbtranslation := aShape extent halvedAsFloat negated.
+
+		matrix translateBy: lbtranslation.
+
+		self pathTransformLoadMatrix.
+
+		athensCanvas setPathMatrix.
+
+		(aShape paint asAthensPaintOn: athensCanvas) loadOnCairoCanvas:
+			athensCanvas.
+
+		aBlock cull: aShape.
+
+		athensCanvas pathTransform translateBy: lbtranslation negated.
+
+		self showEncompassingRectangleIfNecessary: aShape.
+
+		aShape isDirty: false ]
 ]
 
 { #category : 'visiting - helpers' }

@@ -77,6 +77,17 @@ RSUtilsTest >> testChoose [
 ]
 
 { #category : 'tests' }
+RSUtilsTest >> testExponentiallyWeighted [
+
+	self
+		assert: (#( 4 8 0 ) exponentiallyWeighted: 1 / 2) equals: #( 4 6 3 );
+		assert: (#( 4 8 0 ) exponentiallyWeighted: 1) equals: #( 4 8 0 );
+		assert: (#( 4 8 0 ) exponentiallyWeighted: 0) equals: #( 4 4 4 );
+		assert: (#(  ) exponentiallyWeighted: 1 / 2) equals: #(  );
+		assert: ({ 0 @ 0. 2 @ 4 } exponentiallyWeighted: 1 / 2) equals: { 0 @ 0. 1 @ 2 }
+]
+
+{ #category : 'tests' }
 RSUtilsTest >> testGoldenRatios [
 
 	self
