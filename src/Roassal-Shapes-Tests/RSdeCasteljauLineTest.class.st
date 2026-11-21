@@ -95,6 +95,23 @@ RSdeCasteljauLineTest >> testCurveOfTheSchemeInSmalltalk [
 ]
 
 { #category : 'tests' }
+RSdeCasteljauLineTest >> testDerivativeScaleOfAMovedLine [
+	"A derivative line keeps its own translation: scaling the line scales the translation too. The number of samples grows with the control polygon, so the curves are compared at the same parameters"
+
+	| derivative scaled |
+	derivative := (RSdeCasteljauLine new
+		               samplesLinspace: 20;
+		               controlPoints: self controlPoints;
+		               yourself) derivative.
+	derivative translateBy: 30 @ -40.
+	scaled := derivative scale: 2.
+	(0 to: 1 by: 1 / 10) do: [ :t |
+		self assert:
+			((scaled controlPointsAt: t) distanceTo:
+				 (derivative controlPointsAt: t) * 2) < 1.0e-6 ]
+]
+
+{ #category : 'tests' }
 RSdeCasteljauLineTest >> testEndPoints [
 
 	self lines do: [ :line |

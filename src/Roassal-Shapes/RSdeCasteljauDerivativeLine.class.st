@@ -42,9 +42,18 @@ RSdeCasteljauDerivativeLine >> initialize [
 
 { #category : 'adding' }
 RSdeCasteljauDerivativeLine >> newLine [
-	"instance creation"
+	"A line with my translation: the lines derived from me (difference, increment, junctions, splits) stay where I am"
 
 	^ super newLine
 		  basicTranslateBy: translation;
+		  yourself
+]
+
+{ #category : 'accessing' }
+RSdeCasteljauDerivativeLine >> scale: factor [
+	"My curve scaled by factor: my design points, and my translation, that #newLine carries over unscaled"
+
+	^ (super scale: factor)
+		  basicTranslateBy: translation * (factor - 1);
 		  yourself
 ]
