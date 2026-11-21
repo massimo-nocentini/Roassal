@@ -3,7 +3,8 @@ Class {
 	#superclass : 'RSParametricLine',
 	#instVars : [
 		'x',
-		'y'
+		'y',
+		'translation'
 	],
 	#category : 'Roassal-Shapes-Lines',
 	#package : 'Roassal-Shapes',
@@ -12,26 +13,24 @@ Class {
 
 { #category : 'actions' }
 RSParametricXYLine >> basicTranslateBy: delta [
-	"I have no design points: translate my functions"
+	"I have no design points: add delta to my translation, which my points add to the values of my functions, so that moving me often does not nest blocks"
 
-	| xBlock yBlock |
-	xBlock := x.
-	yBlock := y.
+	translation := translation + delta.
 
-	self
-		x: [ :t | (xBlock value: t) + delta x ]
-		y: [ :t | (yBlock value: t) + delta y ]
+	self controlPoints: {  }
 ]
 
 { #category : 'accessing' }
 RSParametricXYLine >> controlPoints: aSequenceableOfPoints at: t [
 
-	^ (x value: t) @ (y value: t)
+	^ (x value: t) + translation x @ ((y value: t) + translation y)
 ]
 
 { #category : 'initialization' }
 RSParametricXYLine >> initialize [
-	"The point 0 @ 0, as the default control points of RSAbstractControlPointsLine, for the parameters 0 and 1"
+	"The point 0 @ 0, as the default control points of RSAbstractControlPointsLine, for the parameters 0 and 1, and no translation"
+
+	translation := 0 @ 0.
 
 	super initialize.
 
@@ -64,11 +63,12 @@ RSParametricXYLine >> notifyDesignPointsChanged [
 
 { #category : 'accessing' }
 RSParametricXYLine >> scale: factor [
-	"accessing"
+	"My curve scaled by factor, its translation too"
 
 	^ self newLine
 		  x: [ :t | (x value: t) * factor ]
 		  y: [ :t | (y value: t) * factor ];
+		  basicTranslateBy: translation * factor;
 		  yourself
 ]
 
