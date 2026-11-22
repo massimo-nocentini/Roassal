@@ -136,6 +136,20 @@ RSBoundingTest >> testPosition [
 ]
 
 { #category : 'tests' }
+RSBoundingTest >> testSameColorAsBorderColor [
+
+	| box |
+	box := RSBox new
+		       border: (RSBorder new color: Color red; yourself);
+		       color: Color blue;
+		       yourself.
+	box sameColorAsBorderColor.
+	self
+		assert: box color equals: Color red;
+		assert: box border color equals: Color red
+]
+
+{ #category : 'tests' }
 RSBoundingTest >> testTranslateTopLeftTo [
 
 	| b |
