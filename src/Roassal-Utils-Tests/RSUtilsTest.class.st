@@ -21,6 +21,73 @@ RSUtilsTest >> testAsCompositeShape [
 ]
 
 { #category : 'tests' }
+RSUtilsTest >> testAsStringaz [
+
+	self
+		assert: ((0 to: 104) collect: [ :each | each asStringaz ])
+		equals:
+			#( 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' 'a' 'b' 'c' 'd' 'e' 'f'
+			   'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'rq' 'rr' 'rs' 'rt' 'ru'
+			   'rv' 'rw' 'rx' 'ry' 'rz' 'ra' 'rb' 'rc' 'rd' 're' 'rf' 'rg' 'rh'
+			   'ri' 'rj' 'rk' 'rl' 'rm' 'rn' 'ro' 'rp' 'sq' 'sr' 'ss' 'st' 'su'
+			   'sv' 'sw' 'sx' 'sy' 'sz' 'sa' 'sb' 'sc' 'sd' 'se' 'sf' 'sg' 'sh'
+			   'si' 'sj' 'sk' 'sl' 'sm' 'sn' 'so' 'sp' 'tq' 'tr' 'ts' 'tt' 'tu'
+			   'tv' 'tw' 'tx' 'ty' 'tz' 'ta' 'tb' 'tc' 'td' 'te' 'tf' 'tg' 'th'
+			   'ti' 'tj' 'tk' 'tl' 'tm' 'tn' 'to' 'tp' 'uq' ).
+
+	"Ensure #asStringaz is a bijection: for the sake of clarity,
+	 to each integer corresponds an unique az representation."
+	10000 in: [ :n | 
+		self
+			assert:
+			((1 to: n) collect: [ :each | each asStringaz ] as: Set) size
+			equals: n ]
+]
+
+{ #category : 'tests' }
+RSUtilsTest >> testAsStringScaledUptoHours [
+	"The first unit, from hours down to nanoseconds, that the duration is at least one of"
+
+	self
+		assert: 9 milliSeconds asStringScaledUptoHours equals: '9.0 millisec';
+		assert: 90 minutes asStringScaledUptoHours equals: '1.5 hour';
+		assert: 2 seconds asStringScaledUptoHours equals: '2.0 sec';
+		assert: (Duration seconds: 0 nanoSeconds: 1500) asStringScaledUptoHours equals: '1.5 microsec';
+		assert: (Duration seconds: 0 nanoSeconds: 7) asStringScaledUptoHours equals: '7.0 nanosec';
+		assert: Duration zero asStringScaledUptoHours equals: '0.0 nanosec';
+		assert: (String streamContents: [ :aStream | 3 hours printScaledUptoHoursOn: aStream ]) equals: '3.0 hour'
+]
+
+{ #category : 'tests' }
+RSUtilsTest >> testAtInOrderedCollectionAdd [
+
+	| dictionary |
+	dictionary := Dictionary new.
+	self
+		assert: (dictionary at: #a inOrderedCollectionAdd: 1) equals: (OrderedCollection with: 1);
+		assert: (dictionary at: #a inOrderedCollectionAdd: 2) equals: (OrderedCollection with: 1 with: 2);
+		assert: (dictionary at: #b inOrderedCollectionAdd: 3) equals: (OrderedCollection with: 3);
+		assert: dictionary size equals: 2;
+		assert: (dictionary at: #a) identicalTo: (dictionary at: #a inOrderedCollectionAdd: 4);
+		assert: (dictionary at: #a) asArray equals: #( 1 2 4 )
+]
+
+{ #category : 'tests' }
+RSUtilsTest >> testAtUpdate [
+	"Any collection with at: and at:put:, not only a Dictionary"
+
+	| array ordered |
+	array := Array with: 1 with: 2.
+	self
+		assert: (array at: 2 update: [ :each | each * 10 ]) equals: 20;
+		assert: array equals: #( 1 20 ).
+	ordered := OrderedCollection with: 3 with: 4.
+	ordered at: 1 update: [ :each | each max: 5 ].
+	self assert: ordered asArray equals: #( 5 4 ).
+	self should: [ array at: 3 update: [ :each | each ] ] raise: SubscriptOutOfBounds
+]
+
+{ #category : 'tests' }
 RSUtilsTest >> testBernstein [
 	"The Bernstein polynomials of degree n sum to 1 at any t"
 
@@ -107,6 +174,23 @@ RSUtilsTest >> testGoldenRatios [
 ]
 
 { #category : 'tests' }
+RSUtilsTest >> testGreatestCommonIndex [
+	"The length of the longest common prefix, comparing the elements by identity"
+
+	| a b |
+	a := 'a' copy.
+	b := 'b' copy.
+	self
+		assert: (#( 1 2 3 ) greatestCommonIndex: #( 1 2 4 )) equals: 2;
+		assert: (#( 1 2 ) greatestCommonIndex: #( 1 2 3 )) equals: 2;
+		assert: (#( 1 2 3 ) greatestCommonIndex: #( 1 2 3 )) equals: 3;
+		assert: (#( 1 2 3 ) greatestCommonIndex: #( 4 2 3 )) equals: 0;
+		assert: (#(  ) greatestCommonIndex: #( 1 )) equals: 0;
+		assert: ({ a. b } greatestCommonIndex: (OrderedCollection with: a with: b)) equals: 2;
+		assert: ({ a. b } greatestCommonIndex: { a copy. b }) equals: 0
+]
+
+{ #category : 'tests' }
 RSUtilsTest >> testHalvedDoubled [
 
 	self
@@ -120,6 +204,20 @@ RSUtilsTest >> testHalvedDoubled [
 		assert: 1.5 decrement equals: 0.5;
 		assert: (3 @ 4) halved equals: (3 / 2) @ 2;
 		assert: (3 @ 4) halvedAsFloat equals: 1.5 @ 2.0
+]
+
+{ #category : 'tests' }
+RSUtilsTest >> testIfAbsentPutOrderAt [
+	"Each new key gets the index of its insertion"
+
+	| dictionary |
+	dictionary := IdentityDictionary new.
+	self
+		assert: (dictionary ifAbsentPutOrderAt: #x) equals: 1;
+		assert: (dictionary ifAbsentPutOrderAt: #y) equals: 2;
+		assert: (dictionary ifAbsentPutOrderAt: #x) equals: 1;
+		assert: (dictionary ifAbsentPutOrderAt: #z) equals: 3;
+		assert: dictionary size equals: 3
 ]
 
 { #category : 'tests' }
@@ -165,6 +263,19 @@ RSUtilsTest >> testRectangleCenteredAtOrigin [
 		assert: rectangle origin equals: -2 @ -3;
 		assert: rectangle extent equals: 4 @ 6;
 		assert: rectangle center equals: 0 @ 0
+]
+
+{ #category : 'tests' }
+RSUtilsTest >> testScan [
+	"The partial folds, with or without the initial value"
+
+	self
+		assert: (#( 1 2 3 ) scan: [ :acc :each | acc + each ] init: 0) equals: #( 0 1 3 6 );
+		assert: (#( 1 2 3 ) scan: [ :acc :each | acc + each ] init: 0 included: false) equals: #( 1 3 6 );
+		assert: (#( 1 2 3 ) scan: [ :acc :each | acc + each ] withoutInit: 0) equals: #( 1 3 6 );
+		assert: (#( 2 3 ) scan: [ :acc :each | acc * each ] init: 1) equals: #( 1 2 6 );
+		assert: (#(  ) scan: [ :acc :each | acc + each ] init: 0) equals: #( 0 );
+		assert: ((OrderedCollection withAll: #( 1 1 )) scan: [ :acc :each | acc + each ] init: 0) asArray equals: #( 0 1 2 )
 ]
 
 { #category : 'tests' }

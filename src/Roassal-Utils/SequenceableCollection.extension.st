@@ -24,3 +24,45 @@ SequenceableCollection >> exponentiallyWeighted: beta init: init [
 			  wCorrected := w / (1 - (beta ** index)).
 			  aStream nextPut: wCorrected ] ]
 ]
+
+{ #category : '*Roassal-Utils' }
+SequenceableCollection >> greatestCommonIndex: aCollection [
+
+	| index stop |
+	stop := false.
+	index := 1.
+
+	[ stop or: [ index > self size or: [ index > aCollection size ] ] ] 
+		whileFalse: [ 
+			(self at: index) == (aCollection at: index)
+				ifTrue: [ index := index + 1 ]
+				ifFalse: [ stop := true ] ].
+
+	^ index - 1
+]
+
+{ #category : '*Roassal-Utils' }
+SequenceableCollection >> scan: aBlock init: aValue [
+
+	^ self scan: aBlock init: aValue included: true
+]
+
+{ #category : '*Roassal-Utils' }
+SequenceableCollection >> scan: aBlock init: aValue included: included [
+
+	^ self class
+		  new: self size + included asBit
+		  streamContents: [ :aStream |
+			  | acc |
+			  included ifTrue: [ aStream nextPut: aValue ].
+			  acc := aValue.
+			  self do: [ :each |
+				  acc := aBlock value: acc value: each.
+				  aStream nextPut: acc ] ]
+]
+
+{ #category : '*Roassal-Utils' }
+SequenceableCollection >> scan: aBlock withoutInit: aValue [
+
+	^ self scan: aBlock init: aValue included: false
+]
