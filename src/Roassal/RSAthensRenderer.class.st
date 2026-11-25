@@ -966,6 +966,8 @@ RSAthensRenderer >> visitCanvas: aRSCanvas [
 	aRSCanvas shouldClearBackground ifTrue: [
 		self clearRectangle: transformeDirtyRectangle ].
 	modifiedDirtyRectangle := self inverseTransform: transformeDirtyRectangle.
+	"The children of the composites and the lines are tested with the pixels that are cleared"
+	dirtyRectangle := modifiedDirtyRectangle.
 	athensCanvas clipBy: transformeDirtyRectangle during: [
 		(self shapesOf: aRSCanvas intersecting: modifiedDirtyRectangle) do: [ :each | each accept: self ] ].
 	dirtyRectangle := transformeDirtyRectangle.
