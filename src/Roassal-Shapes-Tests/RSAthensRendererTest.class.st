@@ -92,6 +92,28 @@ RSAthensRendererTest >> testChildrenOfACompositeScaledToZero [
 	self assert: (canvas asForm colorAt: 80 @ 80) equals: Color blue
 ]
 
+{ #category : 'tests - dirty rectangle' }
+RSAthensRendererTest >> testDirtyRectangleOfAChangeOutOfTheWindow [
+	"It does not join the window, nor the space origin, to what is out of the window"
+	#( #( 0 0 ) #( 400 400 ) #( -400 -400 ) ) do: [ :center |
+		| canvas visible box |
+		canvas := self newCanvas: 100 @ 100.
+		visible := RSBox new extent: 10 @ 10; yourself.
+		canvas add: visible.
+		box := RSBox new extent: 10 @ 10; position: 7000 @ 7000; yourself.
+		canvas add: box.
+		canvas camera position: center first @ center second.
+		visible translateTo: canvas visibleRectangle floatCenter.
+		canvas asForm.
+		self assert: canvas dirtyRectangle isNil.
+		box color: Color green.
+		box translateBy: 1 @ 1.
+		self assert: canvas dirtyRectangle isNil.
+		visible color: Color green.
+		box translateBy: 1 @ 1.
+		self assert: canvas dirtyRectangle equals: visible encompassingRectangle ]
+]
+
 { #category : 'tests - partial repaint' }
 RSAthensRendererTest >> testPartialRepaintNextToALine [
 	"The line is in the pixels that the repaint of the box clears, rounded outwards, and not in the rectangle of the box"
@@ -154,6 +176,16 @@ RSAthensRendererTest >> testPartialRepaintOfAChildOfAFixedComposite [
 	composite translateTo: 220 @ 80.
 	self assertPartialRepaintOf: canvas after: [ box color: Color blue ].
 	self assertPartialRepaintOf: canvas after: [ box translateBy: 5 @ 5 ]
+]
+
+{ #category : 'tests - dirty rectangle' }
+RSAthensRendererTest >> testPartialRepaintOfAShapeLeavingTheWindow [
+	| canvas box |
+	canvas := self newCanvas: 100 @ 100.
+	box := RSBox new extent: 10 @ 10; color: Color red; yourself.
+	canvas add: box.
+	self assertPartialRepaintOf: canvas after: [ box translateTo: 7000 @ 7000 ].
+	self assertPartialRepaintOf: canvas after: [ box translateTo: 45 @ 45 ]
 ]
 
 { #category : 'helpers' }

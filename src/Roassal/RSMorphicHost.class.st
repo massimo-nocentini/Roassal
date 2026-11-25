@@ -90,13 +90,10 @@ RSMorphicHost >> dirtyRectangle [
 
 { #category : 'accessing' }
 RSMorphicHost >> dirtyRectangle: aRectangleOrNil [
+	"Nothing is dirty when aRectangleOrNil is out of the window"
 
-	| visibleRectangle |
-	dirtyRectangle := aRectangleOrNil.
-	dirtyRectangle ifNil: [ ^ self ].
-	visibleRectangle := canvas visibleRectangle.
-	"We already do the same check above but this second guard is here to workaround a concurrency problem..."
-	dirtyRectangle := dirtyRectangle ifNotNil: [ :dr | dr intersect: visibleRectangle ]
+	dirtyRectangle := aRectangleOrNil ifNotNil: [ :rectangle |
+		                  rectangle intersect: canvas visibleRectangle ifNone: [ nil ] ]
 ]
 
 { #category : 'antialiasing' }
@@ -172,7 +169,12 @@ RSMorphicHost >> signalUpdate [
 
 { #category : 'update' }
 RSMorphicHost >> updateDirtyRectangleWith: aRectangle [
-	self dirtyRectangle: (dirtyRectangle
-			 ifNil: [ aRectangle ]
-			 ifNotNil: [ dirtyRectangle merge: aRectangle ])
+	"The part of aRectangle in the window is dirty too. The rest is left out before merging, so that
+	a change out of the window does not extend what is repainted"
+
+	| visible |
+	visible := aRectangle intersect: canvas visibleRectangle ifNone: [ ^ self ].
+	dirtyRectangle := dirtyRectangle
+		                  ifNil: [ visible ]
+		                  ifNotNil: [ :current | current merge: visible ]
 ]
