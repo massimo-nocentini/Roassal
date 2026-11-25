@@ -328,10 +328,22 @@ RSShape >> computeEncompassingRectangleFor: rect matrix: aMatrix [
 
 { #category : 'accessing - computed' }
 RSShape >> computeInverseEncompassingRectangleFor: rect matrix: aMatrix [
-	| groupOfPoints |
-	groupOfPoints := #(topLeft topRight bottomRight bottomLeft)
-		collect: [ :s | aMatrix inverseTransform: (s value: rect) ].
-	^ Rectangle encompassing: groupOfPoints
+	"The inverse is computed from the determinant: AthensAffineTransform>>inverseTransform: divides
+	by sx, which a quarter turn leaves at 1e-16 or so instead of 0. A degenerate matrix (a shape
+	scaled to 0) has no inverse, and what it transforms does not show: the rectangle is empty"
+	| sx sy shx shy determinant |
+	sx := aMatrix sx.
+	sy := aMatrix sy.
+	shx := aMatrix shx.
+	shy := aMatrix shy.
+	determinant := sx * sy - (shx * shy).
+	determinant isZero ifTrue: [ ^ 0 @ 0 corner: 0 @ 0 ].
+	^ Rectangle encompassing: (#( topLeft topRight bottomRight bottomLeft ) collect: [ :s |
+		  | point dx dy |
+		  point := s value: rect.
+		  dx := point x - aMatrix x.
+		  dy := point y - aMatrix y.
+		  sy * dx - (shx * dy) / determinant @ (sx * dy - (shy * dx) / determinant) ])
 ]
 
 { #category : 'copying' }
