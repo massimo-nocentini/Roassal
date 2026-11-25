@@ -47,6 +47,31 @@ RSAthensRendererTest >> testArcCorner [
 		equals: (-54.9506649278924@ 200.80455223867077) -> (-46.47771241701749@ 215.03446758248086)
 ]
 
+{ #category : 'tests - dirty rectangle' }
+RSAthensRendererTest >> testChangeWhileDrawing [
+	"A shape that changes while the canvas is drawn is repainted at the next frame"
+	| canvas box hook |
+	canvas := self newCanvas: 100 @ 100.
+	box := RSBox new
+		       extent: 20 @ 20;
+		       position: -30 @ 0;
+		       color: Color red;
+		       yourself.
+	hook := RSChangingShapeForTest new.
+	hook extent: 20 @ 20; position: 30 @ 0.
+	canvas add: box.
+	canvas add: hook.
+	canvas asForm.
+	hook block: [
+		hook block: nil.
+		box color: Color blue ].
+	hook color: Color green.
+	canvas asForm.
+	self assert: canvas dirtyRectangle isNotNil.
+	self assert: (canvas asForm colorAt: 20 @ 50) equals: Color blue.
+	self assert: canvas dirtyRectangle isNil
+]
+
 { #category : 'tests - nested' }
 RSAthensRendererTest >> testChildrenOfACompositeAfterAQuarterTurn [
 	"The sine and the cosine of a quarter turn are not exactly 0: the children in the window are drawn all the same"
@@ -112,6 +137,23 @@ RSAthensRendererTest >> testDirtyRectangleOfAChangeOutOfTheWindow [
 		visible color: Color green.
 		box translateBy: 1 @ 1.
 		self assert: canvas dirtyRectangle equals: visible encompassingRectangle ]
+]
+
+{ #category : 'tests - dirty rectangle' }
+RSAthensRendererTest >> testErrorWhileDrawing [
+	"What an error leaves undrawn is still to repaint"
+	| canvas hook |
+	canvas := self newCanvas: 100 @ 100.
+	hook := RSChangingShapeForTest new.
+	hook extent: 20 @ 20.
+	canvas add: hook.
+	canvas asForm.
+	hook color: Color green.
+	hook block: [ self error: 'while drawing' ].
+	self should: [ canvas asForm ] raise: Error.
+	hook block: nil.
+	self assert: canvas dirtyRectangle equals: hook encompassingRectangle.
+	self assert: (canvas asForm colorAt: 50 @ 50) equals: Color green
 ]
 
 { #category : 'tests - partial repaint' }

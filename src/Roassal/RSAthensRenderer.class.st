@@ -734,6 +734,48 @@ RSAthensRenderer >> createStrokePaintFor: border [
 ]
 
 { #category : 'visiting - helpers' }
+RSAthensRenderer >> drawDirtyRectangleOf: aRSCanvas [
+	"Draw the shapes of aRSCanvas in dirtyRectangle"
+
+	| transformeDirtyRectangle oldDirtyRectangle modifiedDirtyRectangle |
+	matrix := AthensAffineTransform new.
+	originMatrix := matrix copy.
+	canvasRect := aRSCanvas visibleRectangle.
+	oldDirtyRectangle := dirtyRectangle.
+	aRSCanvas shouldShowDirtyRectangle ifTrue: [
+		dirtyRectangle := canvasRect ].
+	showRectangles := aRSCanvas shouldShowEncompassingRectangles.
+	athensCanvas fillRuleEvenOdd.
+	athensCanvas setAA: aRSCanvas host antialiasing.
+	aRSCanvas camera accept: self.
+	transformeDirtyRectangle := self transform: dirtyRectangle.
+	athensCanvas pathTransform loadIdentity.
+	aRSCanvas shouldClearBackground ifTrue: [
+		self clearRectangle: transformeDirtyRectangle ].
+	modifiedDirtyRectangle := self inverseTransform: transformeDirtyRectangle.
+	"The children of the composites and the lines are tested with the pixels that are cleared"
+	dirtyRectangle := modifiedDirtyRectangle.
+	athensCanvas clipBy: transformeDirtyRectangle during: [
+		(self shapesOf: aRSCanvas intersecting: modifiedDirtyRectangle) do: [ :each | each accept: self ] ].
+	dirtyRectangle := transformeDirtyRectangle.
+	matrix loadIdentity.
+	originMatrix loadIdentity.
+	athensCanvas pathTransform loadIdentity.
+	athensCanvas clipBy: transformeDirtyRectangle during: [
+		(aRSCanvas fixedShapes entriesAtRectangle: dirtyRectangle) do: [ :each | each accept: self ] ].
+
+	aRSCanvas shouldShowDirtyRectangle ifFalse: [ ^ self ].
+
+	athensCanvas pathTransform loadIdentity.
+	matrix loadIdentity.
+	originMatrix loadIdentity.
+	aRSCanvas camera accept: self.
+	athensCanvas
+		setPaint: (Color purple alpha: 0.3);
+		drawShape: (self transform: oldDirtyRectangle)
+]
+
+{ #category : 'visiting - helpers' }
 RSAthensRenderer >> drawPathLabel: label [
 	| utf8String act f stroke |
 	utf8String := label path.
@@ -947,46 +989,16 @@ RSAthensRenderer >> visitCamera: camera [
 
 { #category : 'visiting' }
 RSAthensRenderer >> visitCanvas: aRSCanvas [
+	"The dirty rectangle is reset before the drawing: what becomes dirty meanwhile, as in another
+	process, is for the next frame. What an error leaves undrawn is dirty again"
 
-	| transformeDirtyRectangle oldDirtyRectangle modifiedDirtyRectangle |
-	dirtyRectangle := aRSCanvas dirtyRectangle.
-	dirtyRectangle ifNil: [ ^ self ].
-	matrix := AthensAffineTransform new.
-	originMatrix := matrix copy.
-	canvasRect := aRSCanvas visibleRectangle.
-	oldDirtyRectangle := dirtyRectangle.
-	aRSCanvas shouldShowDirtyRectangle ifTrue: [
-		dirtyRectangle := canvasRect ].
-	showRectangles := aRSCanvas shouldShowEncompassingRectangles.
-	athensCanvas fillRuleEvenOdd.
-	athensCanvas setAA: aRSCanvas host antialiasing.
-	aRSCanvas camera accept: self.
-	transformeDirtyRectangle := self transform: dirtyRectangle.
-	athensCanvas pathTransform loadIdentity.
-	aRSCanvas shouldClearBackground ifTrue: [
-		self clearRectangle: transformeDirtyRectangle ].
-	modifiedDirtyRectangle := self inverseTransform: transformeDirtyRectangle.
-	"The children of the composites and the lines are tested with the pixels that are cleared"
-	dirtyRectangle := modifiedDirtyRectangle.
-	athensCanvas clipBy: transformeDirtyRectangle during: [
-		(self shapesOf: aRSCanvas intersecting: modifiedDirtyRectangle) do: [ :each | each accept: self ] ].
-	dirtyRectangle := transformeDirtyRectangle.
-	matrix loadIdentity.
-	originMatrix loadIdentity.
-	athensCanvas pathTransform loadIdentity.
-	athensCanvas clipBy: transformeDirtyRectangle during: [
-		(aRSCanvas fixedShapes entriesAtRectangle: dirtyRectangle) do: [ :each | each accept: self ] ].
+	| rectangle |
+	rectangle := aRSCanvas dirtyRectangle.
+	rectangle ifNil: [ ^ self ].
 	aRSCanvas resetDirtyRectangle.
-
-	aRSCanvas shouldShowDirtyRectangle ifFalse: [ ^ self ].
-
-	athensCanvas pathTransform loadIdentity.
-	matrix loadIdentity.
-	originMatrix loadIdentity.
-	aRSCanvas camera accept: self.
-	athensCanvas
-		setPaint: (Color purple alpha: 0.3);
-		drawShape: (self transform: oldDirtyRectangle)
+	dirtyRectangle := rectangle.
+	[ self drawDirtyRectangleOf: aRSCanvas ] ifCurtailed: [
+		aRSCanvas updateDirtyRectangleWith: rectangle ]
 ]
 
 { #category : 'visiting - helpers' }
