@@ -132,6 +132,30 @@ RSAthensRendererTest >> testPartialRepaintNextToASibling [
 	self assertPartialRepaintOf: canvas after: [ box color: Color green ]
 ]
 
+{ #category : 'tests - partial repaint' }
+RSAthensRendererTest >> testPartialRepaintOfAChildOfAFixedComposite [
+	"The rectangles of a fixed composite are in pixels, also when its nested composites change"
+	| canvas composite nested box |
+	canvas := self newCanvas: 400 @ 400.
+	canvas camera scale: 2; position: 30 @ 20.
+	nested := RSComposite new.
+	box := RSBox new
+		       extent: 30 @ 30;
+		       color: Color red;
+		       yourself.
+	nested add: box.
+	nested add: (RSBox new size: 10; position: 60 @ 60; yourself).
+	nested adjustToChildren.
+	composite := RSComposite new.
+	composite add: nested.
+	composite adjustToChildren.
+	canvas add: composite.
+	composite setAsFixed.
+	composite translateTo: 220 @ 80.
+	self assertPartialRepaintOf: canvas after: [ box color: Color blue ].
+	self assertPartialRepaintOf: canvas after: [ box translateBy: 5 @ 5 ]
+]
+
 { #category : 'helpers' }
 RSAthensRendererTest >> worstDifferenceBetween: pixels and: otherPixels [
 	"The largest difference of a channel, from 0 to 255"

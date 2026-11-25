@@ -590,5 +590,10 @@ RSComposite >> updateDirtyRectangleWith: aRectangle [
 	"nothing to see; then we skip"
 	newRectangle isZero ifTrue: [ ^ self ].
 	newRectangle := self computeEncompassingRectangleFor: newRectangle matrix: matrix.
+	"as in RSShape>>invalidate: the rectangles of a fixed shape are in pixels"
+	(self isFixed and: [ self isInACanvas ]) ifTrue: [
+		| camera |
+		camera := parent camera.
+		newRectangle := camera originMode visibleRectangleFor: camera rectangle: newRectangle ].
 	parent updateDirtyRectangleWith: newRectangle
 ]
