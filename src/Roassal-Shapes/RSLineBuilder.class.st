@@ -151,31 +151,35 @@ RSLineBuilder class >> directedBezier [
 
 { #category : 'instance creation' }
 RSLineBuilder class >> dovetailControlPointsController [
-	"instance creation"
+	"instance creation. The vertical segment of a line breaks where the #childIndex and #siblings of the first of the ancestors of its end (itself included) that has both say, as a tree layout on shape properties sets them; when none has them, as when another layout placed the shapes, it breaks in the middle"
 
 	^ RSHorizontalMidBlockCPAPController new
 		  midPointBlock: [ :from :to :points |
 			  | childIndex siblings index parentShape breakingDepthIndex |
 			  parentShape := to.
 			  [
-			  childIndex := parentShape propertyAt: #childIndex.
-			  siblings := parentShape propertyAt: #siblings.
-			  childIndex isNil or: [ siblings isNil ] ] whileTrue: [
+			  parentShape notNil and: [
+				  childIndex := parentShape propertyAt: #childIndex.
+				  siblings := parentShape propertyAt: #siblings.
+				  childIndex isNil or: [ siblings isNil ] ] ] whileTrue: [
 					  parentShape := parentShape parent ].
 
-			  parentShape := from.
-			  [
-			  breakingDepthIndex := [
-			                        parentShape propertyAt: #breakingDepthIndex ]
-				                        onDNU: #propertyAt:
-				                        do: [ siblings size ] ] whileNil: [
-					  parentShape := parentShape parent ].
+			  parentShape
+				  ifNil: [ 1 / 2 ]
+				  ifNotNil: [
+					  parentShape := from.
+					  [
+					  breakingDepthIndex := [
+					                        parentShape propertyAt: #breakingDepthIndex ]
+						                        onDNU: #propertyAt:
+						                        do: [ siblings size ] ] whileNil: [
+							  parentShape := parentShape parent ].
 
-			  index := points last y > points first y
-				           ifTrue: [ siblings size - childIndex + 1 ]
-				           ifFalse: [ childIndex ].
+					  index := points last y > points first y
+						           ifTrue: [ siblings size - childIndex + 1 ]
+						           ifFalse: [ childIndex ].
 
-			  index / (breakingDepthIndex + 1) ];
+					  index / (breakingDepthIndex + 1) ] ];
 		  yourself
 ]
 
